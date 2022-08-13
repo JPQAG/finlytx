@@ -4,11 +4,10 @@ from analytics.yield_return import YieldReturn
 
 
 class TestYieldReturn(unittest.TestCase):
-    def test_discounted_cash_flow(self):
-        returnValue = YieldReturn.discounted_cash_flow("input string")
+    def test_yield_to_workout(self):
+        returnValue = YieldReturn.yield_to_workout(self)
 
-        assert type(returnValue) is dict
+        assert isinstance(returnValue, float) is True
+
         
-    # TODO
-    ## Get yield from current value, future value and cashflows.
-    ## Get
+

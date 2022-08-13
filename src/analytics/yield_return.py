@@ -13,5 +13,3 @@ class YieldReturn:
             Dict: _description_
         """
         return {}
-
-    

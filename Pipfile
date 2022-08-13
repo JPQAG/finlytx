@@ -4,12 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-coverage = "*"
-pytest = "*"
-mypy = "*"
-black = "*"
 
 [dev-packages]
+coverage = "6.4.3"
+pytest = "7.1.2"
+mypy = "0.971"
+black = "22.6.0"
+flake8 = "5.0.4"
 
 [requires]
 python_version = "3.8"

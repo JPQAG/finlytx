@@ -31,9 +31,17 @@ def present_value(
     number_of_years = years_between_dates(pricing_date, cashflow_date)
     
     return (future_value)/((1+discount_rate)**(number_of_years))
-    
-def future_value():
-    pass
+
+def future_value(
+    pricing_date: datetime.date,
+    cashflow_date: datetime.date,
+    present_value: float,
+    discount_rate: float
+) -> float:
+    number_of_years = years_between_dates(pricing_date, cashflow_date)
+
+    return
+
 
 def discount_rate():
     pass

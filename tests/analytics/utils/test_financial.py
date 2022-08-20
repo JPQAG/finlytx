@@ -1,7 +1,7 @@
 import unittest
 
-from utils import financial
+from analytics.utils.financial import series_present_value
 
 class FinancialTestCase(unittest.TestCase):
-    def test_present_value(self):
-        
+    def test_series_present_value(self):
+        pass

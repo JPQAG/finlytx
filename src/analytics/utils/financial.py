@@ -6,17 +6,23 @@ import datetime
 from .date_time import years_between_dates
 
 
-def series_present_value(
+def present_value_of_cashflows(
     pricing_date: datetime.date,
     cashflows: List[Dict]
 ) -> float:
-    present_value = 0
+    present_value_result = 0
     
     for cashflow in cashflows:
+        present_value_result += present_value(
+            pricing_date,
+            cashflow['date'],
+            cashflow['cashflow_value'],
+            cashflow['discount_rate']
+        )
         
-        present_value += 1
+    return present_value_result
         
-def discount_future_value(
+def present_value(
     pricing_date: datetime.date,
     cashflow_date: datetime.date,
     future_value: float,
@@ -24,7 +30,7 @@ def discount_future_value(
 ) -> float:
     number_of_years = years_between_dates(pricing_date, cashflow_date)
     
-    return (future_value)/(1+discount_rate)^(number_of_years)
+    return (future_value)/((1+discount_rate)**(number_of_years))
     
 def future_value():
     pass

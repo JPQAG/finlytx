@@ -1,11 +1,14 @@
-def yield_to_workout():
+def yield_to_workout() -> None:
     pass
 
-def current_yield():
+
+def current_yield() -> None:
     pass
 
-def z_spread():
+
+def z_spread() -> None:
     pass
 
-def oas_spread():
+
+def oas_spread() -> None:
     pass

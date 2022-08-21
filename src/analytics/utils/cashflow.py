@@ -1,3 +1,2 @@
-
-def generate_cashflows():
+def generate_cashflows() -> None:
     pass

@@ -8,7 +8,3 @@ class TestYieldReturn(unittest.TestCase):
         returnValue = YieldReturn.discounted_cash_flow("input string")
 
         assert type(returnValue) is dict
-        
-    # TODO
-    ## Get yield from current value, future value and cashflows.
-    ## Get

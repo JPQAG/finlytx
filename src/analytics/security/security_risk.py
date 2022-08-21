@@ -1,5 +1,6 @@
-def duration():
+def duration() -> None:
     pass
 
-def value_at_risk():
+
+def value_at_risk() -> None:
     pass

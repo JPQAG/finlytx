@@ -5,7 +5,8 @@ from analytics.utils.financial import (
     present_value,
     present_value_of_cashflows,
     future_value,
-    discount_rate
+    discount_rate,
+    discount_rate_of_cashflows
 )
 from ..helper.testConstants import MOCK_DISCOUNT_CURVE, MOCK_SECURITY_CASHFLOW_ARRAY
 
@@ -54,3 +55,12 @@ class FinancialTestCase(unittest.TestCase):
 
         self.assertEqual(round(result, 2), 0.08)
 
+    def test_discount_rate_of_cashflows(self):
+
+        pricing_date = datetime.datetime(2000, 1, 1)
+        cashflows = MOCK_SECURITY_CASHFLOW_ARRAY
+        present_value = 1000
+
+        result = discount_rate_of_cashflows(pricing_date, cashflows, present_value)
+
+        self.assertEqual(round(result, 6), 0.782602)

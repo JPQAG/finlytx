@@ -22,3 +22,14 @@ def match_cashflow_to_discount_curve(
                 )
 
     return matched_list
+
+def sum_cashflows(
+    cashflows: List[Dict]
+) -> float:
+
+    sum = 0
+
+    for cashflow in cashflows:
+        sum += cashflow['cashflow_value']
+    
+    return sum

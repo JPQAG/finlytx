@@ -2,6 +2,7 @@ from typing import Dict, List
 import datetime
 
 from analytics.utils.cashflow import match_cashflow_to_discount_curve
+from analytics.utils.cashflow import sum_cashflows
 
 from .date_time import years_between_dates
 
@@ -51,6 +52,36 @@ def future_value(
 
     return result
 
+def discount_rate_of_cashflows(
+    pricing_date: datetime.timedelta,
+    cashflows: List[Dict],
+    present_value: float
+) -> float:
+    """Calculate interest rate (discount rate) that discounts sum of cashflows
+        (future value) to present value.
+
+    Args:
+        pricing_date (datetime.delta): Date to which cashflows are discounted.
+        cashflows (List[Dict]): Cashflows between pricing and final cashflow.
+        present_value (float): Present value (usually price/pricing value).
+        future_value (float): Sum of cashflow values.
+
+    Returns:
+        float: discount rate.
+    """
+
+    future_value = sum_cashflows(cashflows)
+
+    final_cashflow_date = cashflows[-1]['date']
+
+    discount_interest_rate = discount_rate(
+        pricing_date, 
+        final_cashflow_date,
+        present_value,
+        future_value
+    )
+
+    return discount_interest_rate
 
 def discount_rate(
     pricing_date: datetime.date,

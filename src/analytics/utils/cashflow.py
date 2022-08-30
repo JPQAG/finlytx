@@ -7,6 +7,15 @@ def match_cashflow_to_discount_curve(
     cashflows: List[Dict],
     discount_curve: List[Dict]
 ) -> List[Dict]:
+    """Match cashflows to discount rates by date.
+
+    Args:
+        cashflows (List[Dict]): Cashflow series
+        discount_curve (List[Dict]): Discount curve series.
+
+    Returns:
+        List[Dict]: Combined date, cashflow value and discount rate.
+    """
 
     matched_list = []
 
@@ -26,6 +35,14 @@ def match_cashflow_to_discount_curve(
 def sum_cashflows(
     cashflows: List[Dict]
 ) -> float:
+    """Calulate the sum of a series of cashflows.
+
+    Args:
+        cashflows (List[Dict]): Cashflow series (date, cashflow_value)
+
+    Returns:
+        float: Sum of cashflows.
+    """
 
     sum = 0
 

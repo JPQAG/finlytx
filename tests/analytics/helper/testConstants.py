@@ -77,3 +77,30 @@ MOCK_CASHFLOW_AND_DISCOUNT_CURVE = [
         "discount_rate": 0.05
     },
 ]
+
+MOCK_BENCHMARK_CURVE = [
+    {
+        "date": datetime.datetime(2001, 1, 1),
+        "rate": 0.01
+    },
+    {
+        "date": datetime.datetime(2002, 1, 1),
+        "rate": 0.02
+    },
+    {
+        "date": datetime.datetime(2003, 1, 1),
+        "rate": 0.03
+    },
+    {
+        "date": datetime.datetime(2004, 1, 1),
+        "rate": 0.035
+    },
+    {
+        "date": datetime.datetime(2005, 1, 1),
+        "rate": 0.0375
+    }
+]
+
+
+
+

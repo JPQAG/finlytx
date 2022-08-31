@@ -1,4 +1,8 @@
+import datetime
+
 from typing import Dict, List
+
+
 
 def generate_cashflows() -> None:
     pass
@@ -50,3 +54,26 @@ def sum_cashflows(
         sum += cashflow['cashflow_value']
     
     return sum
+
+def trim_cashflows_after_workout(
+    cashflows: List[Dict],
+    workout_date: datetime.datetime
+) -> List[Dict]:
+    """Trim the cashflows to exclude any cashflows after workout date.
+
+
+    Args:
+        cashflows (List[Dict]): Date and value of cashflows.
+        workout_date (datetime.datetime): Date after which cashflows will be excluded.
+
+    Returns:
+        List[Dict]: The included cashflows.
+    """
+
+    included_cashflows = []
+
+    for cashflow in cashflows:
+        if cashflow["date"] <= workout_date:
+            included_cashflows.append(cashflow)
+
+    return included_cashflows

@@ -64,3 +64,4 @@ class FinancialTestCase(unittest.TestCase):
         result = discount_rate_of_cashflows(pricing_date, cashflows, present_value)
 
         self.assertEqual(round(result, 6), 0.782602)
+

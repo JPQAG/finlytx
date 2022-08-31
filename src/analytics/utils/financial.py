@@ -39,7 +39,6 @@ def present_value_of_cashflows(
 
     return present_value_result
 
-
 def present_value(
     pricing_date: datetime.date,
     cashflow_date: datetime.date,
@@ -87,7 +86,7 @@ def future_value(
     return result
 
 def discount_rate_of_cashflows(
-    pricing_date: datetime.timedelta,
+    pricing_date: datetime.datetime,
     cashflows: List[Dict],
     present_value: float
 ) -> float:
@@ -98,7 +97,6 @@ def discount_rate_of_cashflows(
         pricing_date (datetime.delta): Date to which cashflows are discounted.
         cashflows (List[Dict]): Cashflows between pricing and final cashflow.
         present_value (float): Present value (usually price/pricing value).
-        future_value (float): Sum of cashflow values.
 
     Returns:
         float: discount rate.

@@ -68,3 +68,5 @@ CashflowStaticData: {
         - Forwards
         - Futures
         - Options
+
+TODO: Floating cashflows.

@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 python-dateutil = "*"
+nelson-siegel-svensson = "*"
 
 [dev-packages]
 coverage = "6.4.3"

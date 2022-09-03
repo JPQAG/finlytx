@@ -32,3 +32,5 @@ class CashflowTestCase(unittest.TestCase):
         result = trim_cashflows_after_workout(cashflows, workout_date)
 
         self.assertEqual(result, cashflows[0:-1])
+
+

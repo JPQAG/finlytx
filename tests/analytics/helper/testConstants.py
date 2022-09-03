@@ -101,6 +101,61 @@ MOCK_BENCHMARK_CURVE = [
     }
 ]
 
+MOCK_BENCHMARK_CURVE_AS_LISTS = [
+    [
+        datetime.datetime(2001, 1, 1),
+        datetime.datetime(2002, 1, 1),
+        datetime.datetime(2003, 1, 1),
+        datetime.datetime(2004, 1, 1),
+        datetime.datetime(2005, 1, 1)
+    ],
+    [
+        0.01,
+        0.02,
+        0.03,
+        0.035,
+        0.0375
+    ]
+]
 
+MOCK_BENCHMARK_CURVE_AS_YEARS = [
+    {
+        "time": 2.0,
+        "rate": 0.01
+    },
+    {
+        "time": 3.0,
+        "rate": 0.02
+    },
+    {
+        "time": 4.0,
+        "rate": 0.03
+    },
+    {
+        "time": 5.0,
+        "rate": 0.035
+    },
+    {
+        "time": 6.0,
+        "rate": 0.0375
+    }
+]
+
+MOCK_BENCHMARK_CURVE_AS_YEARS_AS_LISTS = [
+    [
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0
+    ],
+    [
+        0.01,
+        0.02,
+        0.03,
+        0.035,
+        0.0375
+    ]
+]
 
 

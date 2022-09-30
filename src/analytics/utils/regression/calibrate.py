@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 '''Calibration methods for Nelson-Siegel(-Svensson) Models.
 See `calibrate_ns_ols` and `calibrate_nss_ols` for ordinary least squares
 (OLS) based methods.

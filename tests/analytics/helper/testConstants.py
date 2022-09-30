@@ -27,6 +27,33 @@ MOCK_SECURITY_CASHFLOW_ARRAY = [
     },
 ]
 
+MOCK_SECURITY_FIXED_RATE_CASHFLOW_ARRAY = [
+    {
+        "date": datetime.datetime(2001, 1, 1),
+        "cashflow_value": 10.00
+    },
+    {
+        "date": datetime.datetime(2002, 1, 1),
+        "cashflow_value": 10.00
+    },
+    {
+        "date": datetime.datetime(2003, 1, 1),
+        "cashflow_value": 10.00
+    },
+    {
+        "date": datetime.datetime(2004, 1, 1),
+        "cashflow_value": 10.00
+    },
+    {
+        "date": datetime.datetime(2005, 1, 1),
+        "cashflow_value": 10.00
+    },
+    {
+        "date": datetime.datetime(2005, 1, 1),
+        "cashflow_value": 100.00
+    }
+]
+
 MOCK_DISCOUNT_CURVE = [
     {
         "date": datetime.datetime(2001, 1, 1),
@@ -158,4 +185,37 @@ MOCK_BENCHMARK_CURVE_AS_YEARS_AS_LISTS = [
     ]
 ]
 
+MOCK_SECURITY_PRICING_SERIES = [
+    {
+        "date": datetime.datetime(2000,1,1),
+        "close_price": 100.00
+    },
+    {
+        "date": datetime.datetime(2000,1,2),
+        "close_price": 101.00
+    },
+    {
+        "date": datetime.datetime(2000,1,3),
+        "close_price":100.00
+    },
+    {
+        "date": datetime.datetime(2000,1,4),
+        "close_price": 102.00
+    }
+]
+
+MOCK_SECURITY_RETURNS = [
+    {
+        "date": datetime.datetime(2000,1,2),
+        "return": 0.01
+    },
+    {
+        "date": datetime.datetime(2000,1,3),
+        "return": -0.00990099
+    },
+    {
+        "date": datetime.datetime(2000,1,4),
+        "return": 0.02
+    }
+]
 

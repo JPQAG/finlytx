@@ -2,12 +2,11 @@ import unittest
 import datetime
 import numpy as np
 
-from analytics.utils.curve import (
+from src.analytics.utils.curve import (
     construct_ns_curve,
     construct_nss_curve,
     convert_curve_dict_list_to_lists
 )
-
 
 from ..helper.testConstants import (
     MOCK_BENCHMARK_CURVE,
@@ -15,8 +14,7 @@ from ..helper.testConstants import (
     MOCK_BENCHMARK_CURVE_AS_YEARS_AS_LISTS
 )
 
-from analytics.utils.regression.calibrate import calibrate_ns_ols
-from analytics.utils.regression.calibrate import calibrate_nss_ols
+from src.analytics.utils.regression.calibrate import calibrate_ns_ols, calibrate_nss_ols
 
 class SecurityAnalysisTestCase(unittest.TestCase):
     def test_construct_ns_curve(self):

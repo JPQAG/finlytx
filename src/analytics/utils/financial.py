@@ -1,8 +1,8 @@
 from typing import Dict, List
 import datetime
 
-from analytics.utils.cashflow import match_cashflow_to_discount_curve
-from analytics.utils.cashflow import sum_cashflows
+from src.analytics.utils.cashflow import match_cashflow_to_discount_curve
+from src.analytics.utils.cashflow import sum_cashflows
 
 from .date_time import years_between_dates
 
@@ -138,3 +138,25 @@ def discount_rate(
     result = ((future_value/present_value)**(1/number_of_years)) -1
 
     return result
+
+def calculate_daily_returns(
+    price_series: List[Dict]
+) -> List[Dict]:
+    
+    returns_array = []
+
+    for index, price_record in enumerate(price_series):
+        if index == 0:
+            continue
+        previous_close = price_series[index - 1]['close_price']
+        close = price_series[index]['close_price']
+        daily_return = round((close - previous_close)/previous_close,8)
+
+        returns_array.append(
+            {
+                "date": price_record['date'],
+                "return": daily_return
+            }
+        )
+
+    return returns_array

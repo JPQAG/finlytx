@@ -2,11 +2,11 @@ from typing import Dict, List
 import numpy as np
 import datetime
 
-from analytics.utils.regression.ns import NelsonSiegelCurve
-from analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
+from src.analytics.utils.regression.ns import NelsonSiegelCurve
+from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
 
-from analytics.utils.regression.calibrate import calibrate_ns_ols, calibrate_nss_ols
-from analytics.utils.helper import convert_date_series_to_years
+from src.analytics.utils.regression.calibrate import calibrate_ns_ols, calibrate_nss_ols
+from src.analytics.utils.helper import convert_date_series_to_years
 
 
 def construct_ns_curve(

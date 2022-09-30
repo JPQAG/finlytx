@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
-from analytics.utils.regression.calibrate import (
+from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
+from src.analytics.utils.regression.calibrate import (
     betas_nss_ols, 
     errorfn_nss_ols,
     calibrate_nss_ols

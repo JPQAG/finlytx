@@ -1,13 +1,30 @@
 import unittest
-import datetime
+from datetime import datetime
 
-from analytics.utils.date_time import years_between_dates
+from src.analytics.utils.date_time import (
+    months_between_dates,
+    years_between_dates,
+    days_between_dates
+)
 
 
 class DateTimeTestCase(unittest.TestCase):
+    def test_days_between_dates(self):
+
+        self.assertEqual(days_between_dates(datetime(2010,10,1), datetime(2010,10,4)), 3)
+        self.assertEqual(days_between_dates(datetime(2010,10,1), datetime(2010,9,1)), 30)
+
+    def test_months_between_dates(self):
+
+        self.assertEqual(months_between_dates(datetime(2010,10,1), datetime(2010,9,1)), 1)
+        self.assertEqual(months_between_dates(datetime(2010,10,1), datetime(2009,10,1)), 12)
+        self.assertEqual(months_between_dates(datetime(2010,10,1), datetime(2009,11,1)), 11)
+        self.assertEqual(months_between_dates(datetime(2010,10,1), datetime(2009,8,1)), 14)
+
     def test_years_between_dates(self):
 
-        start_date = datetime.datetime(2000, 1, 1)
-        end_date = datetime.datetime(2001, 1, 1)
+        self.assertEqual(years_between_dates(datetime(2010,10,1), datetime(2010,9,1)), 1)
+        self.assertEqual(years_between_dates(datetime(2010,10,1), datetime(2009,10,1)), 12)
+        self.assertEqual(years_between_dates(datetime(2010,10,1), datetime(2009,11,1)), 11)
+        self.assertEqual(years_between_dates(datetime(2010,10,1), datetime(2009,8,1)), 14)
 
-        self.assertEqual(years_between_dates(start_date, end_date), 1)

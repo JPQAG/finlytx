@@ -1,6 +1,9 @@
 import datetime
-
+from dateutil.relativedelta import relativedelta
 from typing import Dict, List
+
+from src.analytics.utils.date_time import years_between_dates
+
 
 
 
@@ -77,3 +80,49 @@ def trim_cashflows_after_workout(
             included_cashflows.append(cashflow)
 
     return included_cashflows
+
+def generate_fixed_cashflows(
+    starting_date: datetime.datetime,
+    ending_date: datetime.datetime,
+    periods_per_year: float,
+    face_value: float,
+    coupon_rate: float,
+    arrears: bool=True,
+    redemption_discount: float=0
+) -> List[Dict]:
+    """_summary_
+
+    Args:
+        starting_date (datetime.datetime): Starting date of the first period.
+        ending_date (datetime.datetime): Ending date of the final period/
+        periods_per_year (float): Number of periods per year.
+        face_value (float): The face value of the security.
+        coupon_rate (float): Coupon rate of the security.
+        arrears (bool, optional): Payments in arrears or advance. Defaults to True.
+
+    Returns:
+        List[Dict]: List of objects containing cashflows(date, cashflow value)
+    """
+    cashflows_array = []
+
+    first_payment_date = starting_date + relativedelta(years=(1/periods_per_year)) if arrears else starting_date
+    number_of_periods = years_between_dates(starting_date, ending_date)*periods_per_year
+
+    for i in range(0, number_of_periods):
+        cashflow_date = first_payment_date + relativedelta(years=(i/periods_per_year))
+        cashflow_value = coupon_rate * face_value
+        cashflows_array.append(
+            {
+                "date": cashflow_date,
+                "cashflow_value": cashflow_value
+            }
+        )
+        if (i == number_of_periods - 1):
+            cashflows_array.append(
+                {
+                    "date": cashflow_date,
+                    "cashflow_value": face_value * (1 - redemption_discount)
+                }
+            )
+
+    return cashflows_array

@@ -63,7 +63,6 @@ CashflowStaticData: {
             - oas_spread
         - Risk
             - duration
-            - value_at_risk
     - Derivatives
         - Forwards
         - Futures

@@ -1,14 +1,20 @@
 import unittest
 import datetime
 
-from analytics.utils.financial import (
+from src.analytics.utils.financial import (
     present_value,
     present_value_of_cashflows,
     future_value,
     discount_rate,
-    discount_rate_of_cashflows
+    discount_rate_of_cashflows,
+    calculate_daily_returns
 )
-from ..helper.testConstants import MOCK_DISCOUNT_CURVE, MOCK_SECURITY_CASHFLOW_ARRAY
+from ..helper.testConstants import (
+    MOCK_DISCOUNT_CURVE, 
+    MOCK_SECURITY_CASHFLOW_ARRAY, 
+    MOCK_SECURITY_PRICING_SERIES,
+    MOCK_SECURITY_RETURNS
+)
 
 
 class FinancialTestCase(unittest.TestCase):
@@ -65,3 +71,9 @@ class FinancialTestCase(unittest.TestCase):
 
         self.assertEqual(round(result, 6), 0.782602)
 
+    def test_calculate_daily_returns(self):
+        price_series = MOCK_SECURITY_PRICING_SERIES
+
+        result = calculate_daily_returns(price_series)
+
+        self.assertEqual(result, MOCK_SECURITY_RETURNS)

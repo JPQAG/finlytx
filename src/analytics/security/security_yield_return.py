@@ -2,11 +2,10 @@ import datetime
 
 from typing import Dict, List
 
-from analytics.utils.financial import discount_rate_of_cashflows
-from analytics.utils.cashflow import trim_cashflows_after_workout
-from analytics.utils.curve import construct_ns_curve
-from analytics.utils.curve import construct_nss_curve
-from analytics.utils.helper import calculate_years_between_dates
+from src.analytics.utils.financial import discount_rate_of_cashflows
+from src.analytics.utils.cashflow import trim_cashflows_after_workout
+from src.analytics.utils.curve import construct_ns_curve, construct_nss_curve
+from src.analytics.utils.helper import calculate_years_between_dates
 
 def yield_to_workout(
     pricing_date: datetime.datetime,

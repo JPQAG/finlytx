@@ -88,7 +88,8 @@ def generate_fixed_cashflows(
     face_value: float,
     coupon_rate: float,
     arrears: bool=True,
-    redemption_discount: float=0
+    redemption_discount: float=0,
+    days_per_year: int=365
 ) -> List[Dict]:
     """_summary_
 
@@ -105,12 +106,12 @@ def generate_fixed_cashflows(
     """
     cashflows_array = []
 
-    first_payment_date = starting_date + relativedelta(years=(1/periods_per_year)) if arrears else starting_date
+    first_payment_date = starting_date + relativedelta(days=(days_per_year/periods_per_year)) if arrears else starting_date
     number_of_periods = int(round(years_between_dates(starting_date, ending_date)*periods_per_year))
 
     for i in range(0, number_of_periods):
-        cashflow_date = first_payment_date + relativedelta(years=(i/periods_per_year))
-        cashflow_value = coupon_rate * face_value
+        cashflow_date = first_payment_date + relativedelta(days=(i*(days_per_year/periods_per_year)))
+        cashflow_value = (coupon_rate/periods_per_year) * face_value 
         cashflows_array.append(
             {
                 "date": cashflow_date,

@@ -20,22 +20,23 @@ class SecurityRiskTestCase(unittest.TestCase):
 
       result = calculate_macaulay_duration(starting_date, dirty_price=present_value, cashflows=cashflows, yield_to_final=yield_to_final) 
 
-      self.assertEqual(result, 7.0029)
+      self.assertEqual(round(result), round(7.0029))
 
    def test_calculate_macaulay_duration_fixed_semiannual(self):
       # 8-Year | 6% Semiannual Payment bond | yield 6.00%
       starting_date = datetime.datetime(2000, 1, 1)
-      ending_date = datetime.datetime(2008, 1, 1)
+      ending_date = datetime.datetime(2027, 2, 14)
+      settlement_date = datetime.datetime(2019, 4, 11)
       yield_to_final = 0.06
       periods_per_year = 2
       coupon_rate = 0.06
       face_value = 100
+      present_value = 100.940423
 
       cashflows = generate_fixed_cashflows(starting_date, ending_date, periods_per_year, face_value, coupon_rate)
 
-      result = calculate_macaulay_duration(starting_date, cashflows, yield_to_final)
+      result = calculate_macaulay_duration(starting_date, dirty_price=present_value, cashflows=cashflows, yield_to_final=yield_to_final)
 
       self.assertEqual(result, 12.621268)
-
 
 

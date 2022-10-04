@@ -24,7 +24,7 @@ class SecurityAnalysisTestCase(unittest.TestCase):
             workout_date
         )
 
-        self.assertEqual(round(result, 6), 0.861210)
+        self.assertEqual(round(result, 6), 0.860418)
 
     def test_current_yield(self):
 
@@ -58,5 +58,5 @@ class SecurityAnalysisTestCase(unittest.TestCase):
             interpolation_method
         )
 
-        self.assertAlmostEqual(round(result, 6), round((0.861210-0.034429), 6),5)
+        self.assertAlmostEqual(round(result, 6), 0.825989)
 

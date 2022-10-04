@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from typing import Dict, List
+from src.analytics.utils.cashflow import get_most_recent_cashflow
 
 from src.analytics.utils.date_time import days_between_dates, months_between_dates, years_between_dates
 
@@ -38,23 +39,27 @@ def calculate_macaulay_duration(
     Returns:
         float: The security's Macaulay Duration
     """
-    days_between_coupon_dates = days_between_dates(cashflows[0].get("date"), cashflows[1].get("date"))
-    # THis should be calculated by comparing pricing date to cashflow dates.
-    ## Write function to get previous date in set of dates.
-    lastCouponDate = cashflows[0]["date"] - relativedelta(days=days_between_coupon_dates)
+    days_between_coupon_dates = days_between_dates(cashflows[0]["date"], cashflows[1]["date"])
+    periods_per_year = 
+    issue_date = cashflows[0]["date"] - timedelta(days=days_between_coupon_dates)
+    previous_cashflow_date = get_most_recent_cashflow(pricing_date, cashflows) if pricing_date >= cashflows[0]["date"] else issue_date
+    number_of_periods_remaining = years_between_dates(issue_date, cashflows[-1]["date"])
 
-    t = days_between_dates(lastCouponDate, pricing_date)
-    T = days_between_dates(cashflows[0]["date"], cashflows[1]["date"])
+    t = days_between_dates(previous_cashflow_date, pricing_date)
+    T = days_between_coupon_dates
     t_T = t/T
     FV = cashflows[-1]["cashflow_value"]
     r = yield_to_final
-    N = years_between_dates(cashflows[0]["date"], cashflows[-1]["date"])
+    N = None
 
     numerator = 0
     denominator = dirty_price
-    for i in range(1, N + 1):
+    for i in range(0, int(round(number_of_periods_remaining)) + 1):
+        beginning_of_current_period = issue_date if i == 0 else (cashflows[i-1]["date"] + timedelta(days=1))
+        N = years_between_dates(beginning_of_current_period, cashflows[-1]["date"])
+        m = i if i == (number_of_periods_remaining) else (i + 1)
         PMT = cashflows[i]["cashflow_value"]
-        numerator += (((i-t_T)*PMT)/((1+r)**(N-t_T)))
+        numerator += (((m-t_T)*PMT)/((1+r)**(m-t_T)))
        
     macaulay_duration = numerator / denominator
 

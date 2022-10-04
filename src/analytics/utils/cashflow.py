@@ -106,7 +106,7 @@ def generate_fixed_cashflows(
     cashflows_array = []
 
     first_payment_date = starting_date + relativedelta(years=(1/periods_per_year)) if arrears else starting_date
-    number_of_periods = years_between_dates(starting_date, ending_date)*periods_per_year
+    number_of_periods = int(round(years_between_dates(starting_date, ending_date)*periods_per_year))
 
     for i in range(0, number_of_periods):
         cashflow_date = first_payment_date + relativedelta(years=(i/periods_per_year))
@@ -126,3 +126,29 @@ def generate_fixed_cashflows(
             )
 
     return cashflows_array
+
+def get_most_recent_cashflow(
+    reference_date: datetime.datetime,
+    cashflows: List[Dict]
+) -> Dict:
+    """Find the closest last occuring cashflow object relative to a reference date.
+
+    Args:
+        reference_date (datetime.datetime): The date to which 'last occurring' is relative.
+        cashflows (List[Dict]): A security's cashflows in which we are finding the most recent.
+
+    Returns:
+        Dict: The cashflow dictionary for the most recent cashflow.
+    """
+    if not cashflows: 
+        raise ValueError("Cashflows array empty.")
+    elif reference_date < cashflows[0]["date"]:
+        raise ValueError("Reference date before first cashflow date.")
+
+    most_recent_cashflow = cashflows[0]
+
+    for cashflow in cashflows:
+        most_recent_cashflow = cashflow if cashflow["date"] <= reference_date else most_recent_cashflow
+    
+    return most_recent_cashflow
+        

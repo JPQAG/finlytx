@@ -27,7 +27,7 @@ class FinancialTestCase(unittest.TestCase):
 
         result = present_value(pricing_date, cashflow_date, future_value, discount_rate)
 
-        self.assertEqual(round(result, 2), 63016.96)
+        self.assertEqual(round(result, 2), 62990.39)
 
     def test_present_value_of_cashflows(self):
 
@@ -37,7 +37,7 @@ class FinancialTestCase(unittest.TestCase):
 
         result = present_value_of_cashflows(pricing_date, cashflows, discount_curve)
 
-        self.assertEqual(round(result, 2), 15036.46)
+        self.assertEqual(round(result, 2), 15033.82)
 
     def test_future_value(self):
 
@@ -48,7 +48,7 @@ class FinancialTestCase(unittest.TestCase):
 
         result = future_value(pricing_date, cashflow_date, present_value, discount_rate)
 
-        self.assertEqual(round(result, 2), 100000)
+        self.assertEqual(round(result, 2), 100042.18)
 
     def test_discount_rate(self):
 
@@ -69,7 +69,7 @@ class FinancialTestCase(unittest.TestCase):
 
         result = discount_rate_of_cashflows(pricing_date, cashflows, present_value)
 
-        self.assertEqual(round(result, 6), 0.782602)
+        self.assertEqual(round(result, 6), 0.781475)
 
     def test_calculate_daily_returns(self):
         price_series = MOCK_SECURITY_PRICING_SERIES

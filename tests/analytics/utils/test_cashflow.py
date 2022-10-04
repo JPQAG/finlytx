@@ -1,6 +1,8 @@
 import unittest
 import datetime
 from src.analytics.utils.cashflow import (
+    generate_cashflows,
+    get_most_recent_cashflow,
     match_cashflow_to_discount_curve, 
     sum_cashflows, 
     trim_cashflows_after_workout,
@@ -52,6 +54,15 @@ class CashflowTestCase(unittest.TestCase):
         self.assertEqual(result, MOCK_SECURITY_FIXED_RATE_CASHFLOW_ARRAY)
 
     def test_get_most_recent_cashflow(self):
-        
-        
 
+        # Between first and second cashflow
+        self.assertEqual(get_most_recent_cashflow(datetime.datetime(2001,4,1), MOCK_SECURITY_CASHFLOW_ARRAY), MOCK_SECURITY_CASHFLOW_ARRAY[0])
+        # Reference date equals second cashflow date
+        self.assertEqual(get_most_recent_cashflow(datetime.datetime(2002,1,1), MOCK_SECURITY_CASHFLOW_ARRAY), MOCK_SECURITY_CASHFLOW_ARRAY[1])
+        # Before first cashflow throws exception
+        with self.assertRaises(ValueError):
+            get_most_recent_cashflow(datetime.datetime(1999,1,1), MOCK_SECURITY_CASHFLOW_ARRAY)
+        # Empty cashflow array
+        with self.assertRaises(ValueError):
+            get_most_recent_cashflow(datetime.datetime(2001,4,1), [])
+        

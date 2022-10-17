@@ -65,4 +65,4 @@ class CashflowTestCase(unittest.TestCase):
         # Empty cashflow array
         with self.assertRaises(ValueError):
             get_most_recent_cashflow(datetime.datetime(2001,4,1), [])
-        
+

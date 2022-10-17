@@ -5,8 +5,6 @@ from typing import Dict, List
 from src.analytics.utils.date_time import years_between_dates
 
 
-
-
 def generate_cashflows() -> None:
     pass
 

@@ -11,7 +11,7 @@ def calculate_macaulay_duration(
     cashflows: List[Dict],
     yield_to_final: float 
 ) -> float:
-    """Calculate the Macaulay duration of a security.
+    """Calculate the Macaulay duration of a set of cashflows.
 
     *CFA22LVL12021Book5Pg15*
 
@@ -37,13 +37,13 @@ def calculate_macaulay_duration(
         yield_to_final (float): Yield to final cashflow in decimal form.
 
     Returns:
-        float: The security's Macaulay Duration
+        float: The Macaulay Duration of the cashflows.
     """
     days_between_coupon_dates = days_between_dates(cashflows[0]["date"], cashflows[1]["date"])
     periods_per_year = round(365 / days_between_coupon_dates)
-    issue_date = cashflows[0]["date"] - timedelta(days=days_between_coupon_dates)
-    previous_cashflow_date = get_most_recent_cashflow(pricing_date, cashflows) if pricing_date >= cashflows[0]["date"] else issue_date
-    number_of_periods_remaining = years_between_dates(issue_date, cashflows[-1]["date"]) * periods_per_year
+    start_of_first_period_date = cashflows[0]["date"] - timedelta(days=days_between_coupon_dates)
+    previous_cashflow_date = get_most_recent_cashflow(pricing_date, cashflows)["date"] if pricing_date >= cashflows[0]["date"] else start_of_first_period_date
+    number_of_periods_remaining = years_between_dates(start_of_first_period_date, cashflows[-1]["date"]) * periods_per_year
 
     t = days_between_dates(previous_cashflow_date, pricing_date)
     T = days_between_coupon_dates
@@ -55,13 +55,12 @@ def calculate_macaulay_duration(
     numerator = 0
     denominator = dirty_price
     for i in range(0, int(round(number_of_periods_remaining)) + 1):
-        beginning_of_current_period = issue_date if i == 0 else (cashflows[i-1]["date"] + timedelta(days=1))
-
-        N = years_between_dates(beginning_of_current_period, cashflows[-1]["date"])
-        m = i if i == (number_of_periods_remaining) else (i + 1)
         PMT = cashflows[i]["cashflow_value"]
+
+        # TODO: Change so that N is based on cashflow date.
+        N = i if i == (number_of_periods_remaining) else (i + 1)
         
-        numerator += (((m-t_T)*PMT)/((1+r)**(m-t_T)))
+        numerator += (((N-t_T)*PMT)/((1+r)**(N-t_T)))
        
     macaulay_duration = numerator / denominator
 

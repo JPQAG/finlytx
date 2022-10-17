@@ -1,6 +1,7 @@
 import datetime
+from typing import List
 from dateutil.relativedelta import relativedelta
-
+import pandas as pd
 
 def days_between_dates(first_date: datetime.datetime, second_date: datetime.datetime) -> float:
     """Time between two dates in days.
@@ -38,4 +39,19 @@ def years_between_dates(first_date: datetime.datetime, second_date: datetime.dat
     """
     return days_between_dates(first_date, second_date)/days_in_year
 
+def generate_date_range(
+    start_date: datetime.datetime, 
+    end_date: datetime.datetime, 
+    freq: str,
+    arrears: bool
+    ) -> List:
+    
+    date_range = pd.date_range(start_date, periods=periods, freq=pd.DateOffset(years=1))
 
+
+    return [d.strftime("%Y-%m-%d") for d in date_range]
+
+def _get_start_date(
+    start_date: datetime.datetime,
+    arrears: bool
+    )

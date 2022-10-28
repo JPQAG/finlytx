@@ -42,13 +42,18 @@ class DateTimeRangeTestCase(unittest.TestCase):
         test_generate_date_range_start_end    
             4. End date one day later - expect to generate end_date.
             5. start_date equals end_date - expect single date equal to start_date.
-            6. start_date after end_date - expect Exception *TODO: change to specific exception.
+            6. start_date after end_date - expect Exception.
 
         test_generate_date_range_freq
             7. Expect quarterly dates.
             8. Expect monthly dates.
-            9. Expect weekly dates.
-            10. Expect daily dates.
+
+        test_generate_date_range_arrears
+            11. In arrears - expect first date one period after start_date
+            12. In advance - expect first date to be qual to start_date
+
+    *Arrears handling/note: To create arrears range we generate a range between issue_date and terminal_date the range is 
+        created and then the issue_date is removed from the array. For those not in arrears (advance) the final date is removed.
 
     Args:
         unittest (_type_): _description_
@@ -76,15 +81,20 @@ class DateTimeRangeTestCase(unittest.TestCase):
             self.assertTrue("start_date after end_date" in context.exception)
 
     def test_generate_date_range_freq(self):
+        ## Annual
+        self.assertEqual(generate_date_range(start_date="2000-01-01", end_date="2003-01-01", freq="A", arrears=True), ["2000-04-01","2001-04-01","2002-04-01"])
+        ## Semi-Annual
+        self.assertEqual(generate_date_range(start_date="2000-01-01", end_date="2002-01-01", freq="SA", arrears=True), ["2000-04-01","2000-10-01","2001-04-01"])
         ## Quarterly
         self.assertEqual(generate_date_range(start_date="2000-01-01", end_date="2002-01-01", freq="Q", arrears=True), ["2000-04-01","2000-07-01","2000-10-01"])
         ## Monthly
         self.assertEqual(generate_date_range(start_date="2000-01-01", end_date="2002-01-01", freq="M", arrears=True), ["2000-02-01","2000-03-01","2000-04-01"])
-        ## Weekly
-        self.assertEqual(generate_date_range(start_date="2000-01-01", end_date="2002-01-01", freq="W", arrears=True), ["2000-01-08","2000-01-15","2003-01-22"])
-        ## Daily
-        self.assertEqual(generate_date_range(start_date="2000-01-01", end_date="2002-01-01", freq="D", arrears=True), ["2000-01-08","2000-01-15","2003-01-22"])
 
     def test_generate_date_range_arrears(self):
-        pass
+        
+        self.assertEqual(generate_date_range(start_date="2000-01-01", end_date="2003-01-01", freq="A", arrears=True), ["2001-01-01","2002-01-01","2003-01-01"])
+        self.assertEqual(generate_date_range(start_date="2000-01-01", end_date="2001-01-01", freq="A", arrears=False), ["2000-01-01","2001-01-01", "2002-01-01"])
+
+        self.assertEqual(generate_date_range(start_date="2000-01-01", end_date="2000-01-04", freq="M", arrears=True), ["2000-02-01","2000-03-01","2000-04-01"])
+        self.assertEqual(generate_date_range(start_date="2000-01-01", end_date="2000-01-04", freq="M", arrears=False), ["2000-01-01","2000-02-01","2000-03-01"])
 

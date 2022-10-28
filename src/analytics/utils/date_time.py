@@ -1,7 +1,8 @@
 import datetime
-from typing import List
-from dateutil.relativedelta import relativedelta
+from typing import Any, List
 import pandas as pd
+
+from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
 
 def days_between_dates(first_date: datetime.datetime, second_date: datetime.datetime) -> float:
     """Time between two dates in days.
@@ -42,16 +43,48 @@ def years_between_dates(first_date: datetime.datetime, second_date: datetime.dat
 def generate_date_range(
     start_date: datetime.datetime, 
     end_date: datetime.datetime, 
-    freq: str,
-    arrears: bool
+    freq_input: TIMESERIES_TIME_PERIODS.keys,
+    arrears: bool = True
     ) -> List:
+    """_summary_
+
+    Args:
+        start_date (datetime.datetime): _description_
+        end_date (datetime.datetime): _description_
+        freqInput (str): _description_
+        arrears (bool): _description_
+
+    Returns:
+        List: _description_
+    """
+    assert freq_input in TIMESERIES_TIME_PERIODS.keys, f"'{freq_input}' is not in {TIMESERIES_TIME_PERIODS.keys}"
+    assert start_date <= end_date, f"'{start_date}' is after {end_date}"
     
-    date_range = pd.date_range(start_date, periods=periods, freq=pd.DateOffset(years=1))
+    if freq_input == "A":
+        date_range = _annual_range(start_date, end_date, freq_input)
+    else: 
+        date_range = _monthly_range(start_date, end_date, freq_input)
 
+    return date_range.pop() if arrears else date_range[:-1]
 
-    return [d.strftime("%Y-%m-%d") for d in date_range]
+def _annual_range(
+    start_date,
+    end_date,
+    freq
+) -> List:
+    return pd.date_range(start_date, end_date, freq=pd.offset(years=1))
 
-def _get_start_date(
-    start_date: datetime.datetime,
-    arrears: bool
-    )
+def _monthly_range(
+    start_date,
+    end_date,
+    freq
+) -> List:
+    assert freq in TIMESERIES_TIME_PERIODS.keys, f"'{freq}' is not in {TIMESERIES_TIME_PERIODS.keys}"
+    assert start_date <= end_date, f"'{start_date}' is after {end_date}"
+
+    rng = pd.date_range(pd.Timestamp(start_date)-pd.offsets.MonthBegin(),
+                        end_date,
+                        freq='MS')
+    ret = (rng + pd.offsets.Day(pd.Timestamp(start_date).day-1)).to_series()
+    ret.loc[ret.dt.month > rng.month] -= pd.offsets.MonthEnd(1)
+    return pd.DatetimeIndex(ret)

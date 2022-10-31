@@ -1,20 +1,25 @@
 import pandas as pd
+from pandas.tseries.offsets import DateOffset
 
 TIMESERIES_TIME_PERIODS = {
     "A": {
         "description": "annual",
-        "pd_frequency": pd.offset(years=1)
+        "annual_frequency": 1,
+        "pd_frequency": DateOffset(years=1)
     },
     "SA": {
         "description": "semi-annual",
-        "pd_frequency": pd.offset(months=6)
+        "annual_frequency": 2,
+        "pd_frequency": DateOffset(months=6)
     },
     "Q": {
-        "description": "quarterly",
-        "pd_frequency": pd.offset(months=3)
+        "description": "quarterly",\
+        "annual_frequency": 4,
+        "pd_frequency": DateOffset(months=3)
     },
     "M": {
         "description": "monthly",
-        "pd_frequency": pd.offset(months=1)
+        "annual_frequency": 12,
+        "pd_frequency": DateOffset(months=1)
     }
 }

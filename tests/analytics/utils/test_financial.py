@@ -9,7 +9,7 @@ from src.analytics.utils.financial import (
     discount_rate_of_cashflows,
     calculate_daily_returns
 )
-from ..helper.testConstants import (
+from tests.analytics.helper.testConstants import (
     MOCK_DISCOUNT_CURVE, 
     MOCK_SECURITY_CASHFLOW_ARRAY, 
     MOCK_SECURITY_PRICING_SERIES,

@@ -1,6 +1,6 @@
 import unittest
 
-from analytics.yield_return import YieldReturn
+from src.analytics.yield_return import YieldReturn
 
 
 class TestYieldReturn(unittest.TestCase):

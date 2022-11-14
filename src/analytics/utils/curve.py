@@ -76,7 +76,7 @@ def convert_curve_dict_list_to_lists(
         one list for date the next for rate.
 
     Args:
-        curve_dict_list (List[Dict]): Curve tenor list of dictionaries
+        curve_dict_list (List[Dict]): Curve tenor list of dictionaries {'tenor', 'rate'}
 
     Returns:
         List[List]: List of dates, rates
@@ -86,3 +86,47 @@ def convert_curve_dict_list_to_lists(
     rates = [dict['rate'] for dict in curve_dict_list]
 
     return [times, rates]
+
+def bootstrap_curve(
+    base_curve: List[Dict]
+) -> List[Dict]:
+    """Bootstrapped Curve. Used to create zero curve from market/spot curve.
+
+    base_curve must be have evenly spaced tenors.
+
+    Args:
+        base_curve (List[Dict]): List of dictionaries containing tenor and rate as floats.
+
+    Returns:
+        List[Dict]: _description_
+    """
+    assert len(base_curve) != 0, f"Provided curve is empty!"
+    assert all(isinstance(tenor, float) for tenor in (obj['tenor'] for obj in base_curve)), f"All curve tenors must be of type float!"
+
+    bootstrapped_curve = []
+
+    for tenor_object in base_curve:
+        tenor = tenor_object['tenor']
+        rate = tenor_object['rate']
+        cashflow_sum = 0.0
+
+        if tenor == base_curve[0]['tenor']:
+            bootstrapped_curve.append(base_curve[0])
+            continue
+
+        for i in range(0, len(bootstrapped_curve)):
+            cashflow_sum += rate / (1 + bootstrapped_curve[i]['rate'])**(bootstrapped_curve[i]['tenor'])
+        
+        final = 1 + rate
+
+        bootstrapped_rate = (((final) / (1 - (cashflow_sum)))**(1/tenor)) - 1
+
+        bootstrapped_curve.append(
+            {
+                'tenor': tenor,
+                'rate': round(bootstrapped_rate, 4)
+            }
+        )
+
+    return bootstrapped_curve
+

@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 
 from src.analytics.utils.curve import (
+    bootstrap_curve,
     construct_ns_curve,
     construct_nss_curve,
     convert_curve_dict_list_to_lists
@@ -16,7 +17,7 @@ from ..helper.testConstants import (
 
 from src.analytics.utils.regression.calibrate import calibrate_ns_ols, calibrate_nss_ols
 
-class SecurityAnalysisTestCase(unittest.TestCase):
+class CurveTestCase(unittest.TestCase):
     def test_construct_ns_curve(self):
 
         market_curve = MOCK_BENCHMARK_CURVE
@@ -57,4 +58,75 @@ class SecurityAnalysisTestCase(unittest.TestCase):
 
         self.assertEqual(result, MOCK_BENCHMARK_CURVE_AS_YEARS_AS_LISTS)
 
+class BootstrapTestCase(unittest.TestCase):
+
+    def test_boostrap_curve(self):
+        """CFA LEVEL 2 - CFA 2018.
+        Fixed Income - Spot Rates and Forward Rates.
+        """
+
+        curve = [
+            {
+                "tenor": 1.0,
+                "rate": 0.05
+            },
+            {
+                "tenor": 2.0,
+                "rate": 0.0597
+            },
+            {
+                "tenor": 3.0,
+                "rate": 0.0691
+            },
+            {
+                "tenor": 4.00,
+                "rate": 0.0781
+            },
+        ]
+
+        expected = [
+            {
+                "tenor": 1.0,
+                "rate": 0.05
+            },
+            {
+                "tenor": 2.0,
+                "rate": 0.06
+            },
+            {
+                "tenor": 3.0,
+                "rate": 0.07
+            },
+            {
+                "tenor": 4.00,
+                "rate": 0.08
+            },
+        ]
+
+        result = bootstrap_curve(curve)
+
+        self.assertEqual(result, expected)
+
+    def test_bootstrap_empty_curve(self):
+        curve = []
+
+        with self.assertRaises(Exception) as context:
+            bootstrap_curve(
+                curve
+            )
+        self.assertEqual(context.exception.args[0], "Provided curve is empty!")
+
+    def test_bootstrap_curve_wrong_type(self):
+        curve = [
+            {
+                "tenor": 'string',
+                "rate": 1.0
+            }
+        ]
+
+        with self.assertRaises(Exception) as context:
+            bootstrap_curve(
+                curve
+            )
+        self.assertEqual(context.exception.args[0], "All curve tenors must be of type float!")
 

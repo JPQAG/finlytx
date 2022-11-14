@@ -66,3 +66,38 @@ class CashflowTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             get_most_recent_cashflow(datetime.datetime(2001,4,1), [])
 
+class GenerateCashflowTestCase(unittest.TestCase):
+
+    # Test Cases
+    ## Fixed
+    ## Floating
+    ## Arrears
+    ## Advance
+    
+
+    def test_generate_monthly_fixed_cashflows(self):
+
+        fixed_rate = 0.05
+        
+        dates = [
+            datetime.strptime("2000-01-01", "%Y-%m-%d"), 
+            datetime.strptime("2000-02-01", "%Y-%m-%d"),
+            datetime.strptime("2000-03-01", "%Y-%m-%d"),
+            datetime.strptime("2000-04-01", "%Y-%m-%d"),
+            datetime.strptime("2000-05-01", "%Y-%m-%d"),
+            datetime.strptime("2000-06-01", "%Y-%m-%d"),
+            datetime.strptime("2000-07-01", "%Y-%m-%d"),
+            datetime.strptime("2000-08-01", "%Y-%m-%d"),
+            datetime.strptime("2000-09-01", "%Y-%m-%d"),
+            datetime.strptime("2000-10-01", "%Y-%m-%d"),
+            datetime.strptime("2000-11-01", "%Y-%m-%d"),
+            datetime.strptime("2000-12-01", "%Y-%m-%d")
+        ],
+
+        expected = [
+            {
+                datetime.strptime()
+            }
+        ]
+
+       

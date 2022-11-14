@@ -13,7 +13,7 @@ TIMESERIES_TIME_PERIODS = {
         "pd_frequency": DateOffset(months=6)
     },
     "Q": {
-        "description": "quarterly",\
+        "description": "quarterly",
         "annual_frequency": 4,
         "pd_frequency": DateOffset(months=3)
     },

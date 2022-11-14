@@ -2,7 +2,8 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from typing import Dict, List
 
-from src.analytics.utils.date_time import years_between_dates
+from src.analytics.utils.date_time import generate_date_range, years_between_dates
+from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
 
 
 def generate_cashflows() -> None:
@@ -79,50 +80,55 @@ def trim_cashflows_after_workout(
 
     return included_cashflows
 
-def generate_fixed_cashflows(
-    starting_date: datetime.datetime,
-    ending_date: datetime.datetime,
-    periods_per_year: float,
+def generate_cashflows(
+    start_date: datetime.datetime,
+    end_date: datetime.datetime,
+    cashflow_freq: float,
     face_value: float,
     coupon_rate: float,
     arrears: bool=True,
-    redemption_discount: float=0,
-    days_per_year: int=365
+    variable_coupon: bool=False,
+    underlying_curve: List=[],
+    redemption_discount: float=0.00
 ) -> List[Dict]:
-    """_summary_
+    """Generates cashflows from a start_date to end_date. 
+
+    *The end_date specifies the final cashflow date. Thus the start of subsequent periods is the day after the cashflow date (in arrears).
 
     Args:
         starting_date (datetime.datetime): Starting date of the first period.
         ending_date (datetime.datetime): Ending date of the final period/
         periods_per_year (float): Number of periods per year.
         face_value (float): The face value of the security.
-        coupon_rate (float): Coupon rate of the security.
+        coupon_rate (float): Annual coupon rate of the security.
         arrears (bool, optional): Payments in arrears or advance. Defaults to True.
+        variable_coupon (bool, optional): Coupons are variable. Default to False.
+        underlying_curve (List): Underlying benchmark curve to get forward rate forecast.
 
     Returns:
         List[Dict]: List of objects containing cashflows(date, cashflow value)
     """
+    assert all(isinstance(date, (datetime.datetime)) for date in [start_date, end_date]), f"Date arguments must be of type datetime."
+    assert cashflow_freq in TIMESERIES_TIME_PERIODS.keys(), f"'{cashflow_freq}' is not in {TIMESERIES_TIME_PERIODS.keys()}."
+    assert all(isinstance(float_val, float) for float_val in [face_value, coupon_rate, redemption_discount]), f"Numeric args must be of float type."
+    # TODO: FLOATING RATE
+
+    date_range = generate_date_range(start_date, end_date, freq_input=cashflow_freq)
+    annual_frequency = TIMESERIES_TIME_PERIODS[cashflow_freq]['annual_frequency']
     cashflows_array = []
 
-    first_payment_date = starting_date + relativedelta(days=(days_per_year/periods_per_year)) if arrears else starting_date
-    number_of_periods = int(round(years_between_dates(starting_date, ending_date)*periods_per_year))
-
-    for i in range(0, number_of_periods):
-        cashflow_date = first_payment_date + relativedelta(days=(i*(days_per_year/periods_per_year)))
-        cashflow_value = (coupon_rate/periods_per_year) * face_value 
+    for date in date_range:
+        coupon_rate_periodic = "_get_variable_cashflow(date, underlying_curve)" if variable_coupon else (coupon_rate/annual_frequency)
+        if date == date_range[-1]:
+            cashflow = ( face_value * coupon_rate_periodic ) + face_value
+        else:
+            cashflow = ( face_value * coupon_rate_periodic )
         cashflows_array.append(
             {
-                "date": cashflow_date,
-                "cashflow_value": cashflow_value
+                'date': date,
+                'cashflow': cashflow
             }
         )
-        if (i == number_of_periods - 1):
-            cashflows_array.append(
-                {
-                    "date": cashflow_date,
-                    "cashflow_value": face_value * (1 - redemption_discount)
-                }
-            )
 
     return cashflows_array
 
@@ -150,4 +156,3 @@ def get_most_recent_cashflow(
         most_recent_cashflow = cashflow if cashflow["date"] <= reference_date else most_recent_cashflow
     
     return most_recent_cashflow
-        

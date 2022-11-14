@@ -69,3 +69,6 @@ CashflowStaticData: {
         - Options
 
 TODO: Floating cashflows.
+TODO: Regression:
+    1. Multiple regression types.
+    2. Regression maximum error allowance. (testing).

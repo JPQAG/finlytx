@@ -130,3 +130,53 @@ def bootstrap_curve(
 
     return bootstrapped_curve
 
+def forward_curve(
+    market_curve: List[Dict],
+    forward_tenor: float
+) -> Dict[List]:
+    """_summary_
+
+    Simple forward curve. Main use case getting market expectations of rate. e.g. 3M rate.
+
+    Therefore if we want 3M swap rate expectations we want:
+        The 3M rate today. 
+        3M3M
+        6M3M
+        9M3M
+        etc...
+
+    Args:
+        market_curve (List[Dict]): _description_
+        forward_tenor (float): The fraction of a year representing the forward tenor to forecast.
+
+    Returns:
+        List[Dict]: _description_
+    """
+    forward_curve = []
+
+    # WRITE TESTS FIRST.
+    for k in range(0, len(market_curve), forward_curve):
+        if k < (forward_tenor -1):
+            continue
+        elif (k == forward_tenor - 1):
+            forward_curve.append(
+                {
+                    "settle_tenor": market_curve[k]['tenor'] - (forward_tenor/12),
+                    "workout_tenor": market_curve[k]['tenor'],
+                    "rate": market_curve[k]['rate']
+                }
+            )
+        else:
+            forward_curve.append(
+                {
+                    "settle_tenor": market_curve[k]['tenor'] - (forward_tenor/12),
+                    "workout_tenor": market_curve[k]['tenor'],
+                    "rate": 
+                    (
+                        (
+                            (
+                                (1 + market_curve['zero_rate'][k]) ** market_curve['tenor'][k]) / (((1 + market_curve['zero_rate'][k - market_curve]) ** market_curve['tenor'][k - market_curve]))) - 1)
+                }
+            )
+
+    return forward_curve

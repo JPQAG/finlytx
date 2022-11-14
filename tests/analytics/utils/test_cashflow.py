@@ -6,8 +6,9 @@ from src.analytics.utils.cashflow import (
     match_cashflow_to_discount_curve, 
     sum_cashflows, 
     trim_cashflows_after_workout,
-    generate_fixed_cashflows
+    generate_cashflows
 )
+from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
 
 from ..helper.testConstants import MOCK_CASHFLOW_AND_DISCOUNT_CURVE, MOCK_DISCOUNT_CURVE, MOCK_SECURITY_CASHFLOW_ARRAY, MOCK_SECURITY_FIXED_RATE_CASHFLOW_ARRAY
 
@@ -36,23 +37,6 @@ class CashflowTestCase(unittest.TestCase):
 
         self.assertEqual(result, cashflows[0:-1])
 
-    def test_generate_fixed_cashflows(self):
-        starting_date = datetime.datetime(2000,1,1)
-        ending_date = datetime.datetime(2005,1,1)
-        periods_per_year = 1
-        face_value = 100.00
-        coupon_rate = 0.10
-
-        result = generate_fixed_cashflows(
-            starting_date,
-            ending_date,
-            periods_per_year,
-            face_value,
-            coupon_rate
-        )
-
-        self.assertEqual(result, MOCK_SECURITY_FIXED_RATE_CASHFLOW_ARRAY)
-
     def test_get_most_recent_cashflow(self):
 
         # Between first and second cashflow
@@ -70,34 +54,145 @@ class GenerateCashflowTestCase(unittest.TestCase):
 
     # Test Cases
     ## Fixed
-    ## Floating
-    ## Arrears
-    ## Advance
-    
+        
+    def test_generate_cashflows_args_error_start_date_type_incorrect(self):
+
+        coupon_rate_periodic = 0.05/1
+
+        with self.assertRaises(Exception) as context:
+            generate_cashflows(
+                start_date = "2000-01-01",
+                end_date = datetime.datetime.strptime("2000-12-01", "%Y-%m-%d"),
+                cashflow_freq = "M",
+                face_value = 100,
+                coupon_rate = coupon_rate_periodic
+            )
+        self.assertEqual(context.exception.args[0], "Date arguments must be of type datetime.")
+
+    def test_generate_cashflows_args_error_start_date_type_incorrect(self):
+
+        coupon_rate_periodic = 0.05/1
+
+        with self.assertRaises(Exception) as context:
+            generate_cashflows(
+                start_date = datetime.datetime.strptime("2000-01-01", "%Y-%m-%d"),
+                end_date = "2000-12-01",
+                cashflow_freq = "M",
+                face_value = 100,
+                coupon_rate = coupon_rate_periodic
+            )
+        self.assertEqual(context.exception.args[0], "Date arguments must be of type datetime.")
+
+    def test_generate_cashflows_args_error_freq(self):
+        
+        coupon_rate_periodic = 0.05/1
+
+        with self.assertRaises(Exception) as context:
+            generate_cashflows(
+                start_date = datetime.datetime.strptime("2000-01-01", "%Y-%m-%d"),
+                end_date = datetime.datetime.strptime("2000-12-01", "%Y-%m-%d"),
+                cashflow_freq = "PSQ",
+                face_value = 100,
+                coupon_rate = coupon_rate_periodic
+            )
+        self.assertEqual(context.exception.args[0], f"'PSQ' is not in {TIMESERIES_TIME_PERIODS.keys()}.")
+
+    def test_generate_cashflows_args_error_float_type(self):
+        
+        coupon_rate_periodic = 0.05/1
+        
+        with self.assertRaises(Exception) as context:
+            generate_cashflows(
+                start_date = datetime.datetime.strptime("2000-01-01", "%Y-%m-%d"),
+                end_date = datetime.datetime.strptime("2000-12-01", "%Y-%m-%d"),
+                cashflow_freq = "M",
+                face_value = "String incorrect type",
+                coupon_rate = coupon_rate_periodic
+            )
+        self.assertEqual(context.exception.args[0], "Numeric args must be of float type.")
 
     def test_generate_monthly_fixed_cashflows(self):
 
-        fixed_rate = 0.05
-        
-        dates = [
-            datetime.strptime("2000-01-01", "%Y-%m-%d"), 
-            datetime.strptime("2000-02-01", "%Y-%m-%d"),
-            datetime.strptime("2000-03-01", "%Y-%m-%d"),
-            datetime.strptime("2000-04-01", "%Y-%m-%d"),
-            datetime.strptime("2000-05-01", "%Y-%m-%d"),
-            datetime.strptime("2000-06-01", "%Y-%m-%d"),
-            datetime.strptime("2000-07-01", "%Y-%m-%d"),
-            datetime.strptime("2000-08-01", "%Y-%m-%d"),
-            datetime.strptime("2000-09-01", "%Y-%m-%d"),
-            datetime.strptime("2000-10-01", "%Y-%m-%d"),
-            datetime.strptime("2000-11-01", "%Y-%m-%d"),
-            datetime.strptime("2000-12-01", "%Y-%m-%d")
-        ],
+        coupon_rate_periodic = 0.05/12
 
         expected = [
             {
-                datetime.strptime()
+                'date': "2000-02-01",
+                'cashflow': coupon_rate_periodic * 100
+            },
+            {
+                'date': "2000-03-01",
+                'cashflow': coupon_rate_periodic * 100
+            },
+            {
+                'date': "2000-04-01",
+                'cashflow': coupon_rate_periodic * 100
+            },
+            {
+                'date': "2000-05-01",
+                'cashflow': coupon_rate_periodic * 100
+            },
+            {
+                'date': "2000-06-01",
+                'cashflow': coupon_rate_periodic * 100
+            },
+            {
+                'date': "2000-07-01",
+                'cashflow': coupon_rate_periodic * 100
+            },
+            {
+                'date': "2000-08-01",
+                'cashflow': coupon_rate_periodic * 100
+            },
+            {
+                'date': "2000-09-01",
+                'cashflow': coupon_rate_periodic * 100
+            },
+            {
+                'date': "2000-10-01",
+                'cashflow': coupon_rate_periodic * 100
+            },
+            {
+                'date': "2000-11-01",
+                'cashflow': coupon_rate_periodic * 100
+            },
+            {
+                'date': "2000-12-01",
+                'cashflow': (coupon_rate_periodic * 100) + 100
             }
         ]
 
-       
+        result = generate_cashflows(
+            start_date = datetime.datetime.strptime("2000-01-01", "%Y-%m-%d"),
+            end_date = datetime.datetime.strptime("2000-12-01", "%Y-%m-%d"),
+            cashflow_freq = "M",
+            face_value = 100.00,
+            coupon_rate = 0.05
+        )
+
+        self.assertEqual(result, expected)
+
+    def test_generate_annual_fixed_cashflows(self):
+        
+        coupon_rate_periodic = 0.05/1
+
+        expected = [
+            {
+                'date': "2001-01-01",
+                'cashflow': (coupon_rate_periodic * 100) + 100
+            }
+        ]
+
+        result = generate_cashflows(
+            start_date = datetime.datetime.strptime("2000-01-01", "%Y-%m-%d"),
+            end_date = datetime.datetime.strptime("2001-01-01", "%Y-%m-%d"),
+            cashflow_freq = "A",
+            face_value = 100.00,
+            coupon_rate = 0.05
+        )
+
+        self.assertEqual(result, expected)
+
+    ## Floating
+    ## Arrears
+    ## Advance

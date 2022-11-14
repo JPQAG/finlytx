@@ -6,7 +6,8 @@ from src.analytics.utils.curve import (
     bootstrap_curve,
     construct_ns_curve,
     construct_nss_curve,
-    convert_curve_dict_list_to_lists
+    convert_curve_dict_list_to_lists,
+    forward_curve
 )
 
 from ..helper.testConstants import (
@@ -58,7 +59,7 @@ class CurveTestCase(unittest.TestCase):
 
         self.assertEqual(result, MOCK_BENCHMARK_CURVE_AS_YEARS_AS_LISTS)
 
-class BootstrapTestCase(unittest.TestCase):
+class BootstrapCurveTestCase(unittest.TestCase):
 
     def test_boostrap_curve(self):
         """CFA LEVEL 2 - CFA 2018.
@@ -130,3 +131,12 @@ class BootstrapTestCase(unittest.TestCase):
             )
         self.assertEqual(context.exception.args[0], "All curve tenors must be of type float!")
 
+class ForwardCurveTestCase(unittest.TestCase):
+
+    def test_forward_curve(self):
+
+        expected = []
+
+        result = forward_curve([])
+
+        self.assertEqual(result, expected)

@@ -135,8 +135,37 @@ class ForwardCurveTestCase(unittest.TestCase):
 
     def test_forward_curve(self):
 
-        expected = []
+        expected = [
+            {
+                "settle_tenor": 1,
+                "workout_tenor": 2,
+                "rate": 0.03419
+            },
+            {
+                "settle_tenor": 2,
+                "workout_tenor": 3,
+                "rate": 0.02707
+            }
+        ]
 
-        result = forward_curve([])
+        market_curve = [
+            {
+                "tenor": 1,
+                "rate": 0.02548
+            },
+            {
+                "tenor": 2,
+                "rate": 0.02983
+            },
+            {
+                "tenor": 3,
+                "rate": 0.02891
+            }
+        ]
+
+        result = forward_curve(
+            market_curve,
+            1
+        )
 
         self.assertEqual(result, expected)

@@ -3,6 +3,7 @@ import datetime
 
 from src.analytics.utils.cashflow import match_cashflow_to_discount_curve
 from src.analytics.utils.cashflow import sum_cashflows
+from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
 
 from .date_time import years_between_dates
 
@@ -160,3 +161,43 @@ def calculate_daily_returns(
         )
 
     return returns_array
+
+def implied_forward_rate(
+    settlement: Dict,
+    workout: Dict,
+    freq: TIMESERIES_TIME_PERIODS.keys()
+) -> Dict:
+    """_summary_
+
+    IFR_{A, B-A} = \left(\sqrt[B-A]{\frac{(1+Z_{B})^{B}}{(1+Z_{A})^{A}}}\right) - 1
+
+    Where:
+        IFR = Implied Forward Rate
+        A = Settlement tenor
+        B = Workout tenor
+        Z_{A} = Rate at settlement tenor (per period)
+        Z_{B} = Rate at workout tenor (per period)
+        
+    Args:
+        settlement_rate (float): _description_
+        workout_rate (float): _description_
+
+    Returns:
+        float: _description_
+    """
+    assert isinstance(settlement['tenor'], float), f"'{settlement['tenor']}' input must be of type float."
+    assert isinstance(settlement['rate'], float), f"'{settlement['rate']}' input must be of type float."
+    assert isinstance(workout['tenor'], float), f"'{workout['tenor']}' input must be of type float."
+    assert isinstance(workout['rate'], float), f"'{workout['rate']}' input must be of type float."
+    assert freq in TIMESERIES_TIME_PERIODS.keys(), f"{freq} is not in {TIMESERIES_TIME_PERIODS.keys()}"
+
+    annual_frequency = TIMESERIES_TIME_PERIODS[freq]["annual_frequency"]
+
+    A = settlement["tenor"] * annual_frequency
+    B = workout["tenor"] * annual_frequency
+    z_A = settlement["rate"] / annual_frequency
+    z_B = workout["rate"] / annual_frequency
+
+    implied_forward_rate = (((((1 + z_B)**(B))/((1 + z_A)**(A)))**(1.00/(B-A))) - 1) * annual_frequency
+    
+    return implied_forward_rate

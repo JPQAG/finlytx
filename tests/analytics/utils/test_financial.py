@@ -1,20 +1,15 @@
-import unittest
 import datetime
+import unittest
 
-from src.analytics.utils.financial import (
-    present_value,
-    present_value_of_cashflows,
-    future_value,
-    discount_rate,
-    discount_rate_of_cashflows,
-    calculate_daily_returns
-)
-from tests.analytics.helper.testConstants import (
-    MOCK_DISCOUNT_CURVE, 
-    MOCK_SECURITY_CASHFLOW_ARRAY, 
-    MOCK_SECURITY_PRICING_SERIES,
-    MOCK_SECURITY_RETURNS
-)
+from src.analytics.utils.financial import (calculate_daily_returns,
+                                           discount_rate,
+                                           discount_rate_of_cashflows,
+                                           future_value, implied_forward_rate, present_value,
+                                           present_value_of_cashflows)
+from tests.analytics.helper.testConstants import (MOCK_DISCOUNT_CURVE,
+                                                  MOCK_SECURITY_CASHFLOW_ARRAY,
+                                                  MOCK_SECURITY_PRICING_SERIES,
+                                                  MOCK_SECURITY_RETURNS)
 
 
 class FinancialTestCase(unittest.TestCase):
@@ -77,3 +72,76 @@ class FinancialTestCase(unittest.TestCase):
         result = calculate_daily_returns(price_series)
 
         self.assertEqual(result, MOCK_SECURITY_RETURNS)
+
+class ImpliedForwardTestCase(unittest.TestCase):
+
+    def test_implied_forward_rate_incorrect_input_type(self):
+        settlement = {
+            "tenor": "STRING NOT FLOAT",
+            "rate": 0.0365
+        }
+
+        workout = {
+            "tenor": 4.00,
+            "rate": 0.0418
+        }
+
+        with self.assertRaises(Exception) as context:
+            implied_forward_rate(
+                settlement = settlement,
+                workout = workout,
+                freq="SA"
+            )
+        self.assertEqual(context.exception.args[0], "'STRING NOT FLOAT' input must be of type float.")
+
+    def test_implied_forward_rate_incorrect_freq(self):
+
+        settlement = {
+            "tenor": 3.00,
+            "rate": 0.0365
+        }
+
+        workout = {
+            "tenor": 4.00,
+            "rate": 0.0418
+        }
+
+        with self.assertRaises(Exception) as context:
+            implied_forward_rate(
+                settlement = settlement,
+                workout = workout,
+                freq="PQT"
+            )    
+        self.assertEqual(context.exception.args[0], "PQT is not in dict_keys(['A', 'SA', 'Q', 'M'])")
+
+    def test_implied_forward_rate(self):
+        """Implied forward rate.
+
+        CFA 2021 - Level 1 - Quantitative Methods - Page 555
+        
+        Suppose that the yields-to-maturity on three-year and four-year zero-coupon bonds
+        are 3.65% and 4.18% respectively, stated on a semiannual bond basis. An analyst
+        would like to know the "3Y1Y" implied forward rate, which is the implied
+        one-year forward yield three years into the future. 
+        """
+        settlement = {
+            "tenor": 3.00,
+            "rate": 0.0365
+        }
+
+        workout = {
+            "tenor": 4.00,
+            "rate": 0.0418
+        }
+
+        result = implied_forward_rate(
+            settlement = settlement,
+            workout = workout,
+            freq="SA"
+        )
+
+        expected = 0.05778
+
+        self.assertEqual(round(result, 5), expected)
+
+

@@ -155,7 +155,7 @@ def forward_curve(
     forward_curve = []
 
     # WRITE TESTS FIRST.
-    for k in range(0, len(market_curve), forward_curve):
+    for k in range(0, len(market_curve) - 1, 1):
         if k < (forward_tenor -1):
             continue
         elif (k == forward_tenor - 1):
@@ -169,13 +169,13 @@ def forward_curve(
         else:
             forward_curve.append(
                 {
-                    "settle_tenor": market_curve[k]['tenor'] - (forward_tenor/12),
-                    "workout_tenor": market_curve[k]['tenor'],
-                    "rate": 
-                    (
-                        (
-                            (
-                                (1 + market_curve['zero_rate'][k]) ** market_curve['tenor'][k]) / (((1 + market_curve['zero_rate'][k - market_curve]) ** market_curve['tenor'][k - market_curve]))) - 1)
+                    "settle_tenor": market_curve[k]['tenor'],
+                    "workout_tenor": market_curve[k + 1]['tenor'] - market_curve[k]['tenor'],
+                    "rate": implied_forward_rate(
+                        settlement = {
+                            "tenor": market_curve[k]
+                        }
+                    )
                 }
             )
 

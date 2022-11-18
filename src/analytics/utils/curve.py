@@ -1,6 +1,8 @@
 from typing import Dict, List
 import numpy as np
 import datetime
+from src.analytics.utils.financial import implied_forward_rate
+from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
 
 from src.analytics.utils.regression.ns import NelsonSiegelCurve
 from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
@@ -133,10 +135,12 @@ def bootstrap_curve(
 def forward_curve(
     market_curve: List[Dict],
     forward_tenor: float
-) -> Dict[List]:
+) -> List[Dict]:
     """_summary_
 
     Simple forward curve. Main use case getting market expectations of rate. e.g. 3M rate.
+
+    Expected to always be from previous interpolation constructed curve (therefore uniform).
 
     Therefore if we want 3M swap rate expectations we want:
         The 3M rate today. 
@@ -146,37 +150,33 @@ def forward_curve(
         etc...
 
     Args:
-        market_curve (List[Dict]): _description_
-        forward_tenor (float): The fraction of a year representing the forward tenor to forecast.
+        market_curve (List[Dict]): Equal monthly (1/12) spaced tenors starting from 1/12. 
+        forward_tenor (float): The fraction of a year representing the forward tenor to forecast (a multiple of 1/12).
 
     Returns:
         List[Dict]: _description_
     """
+    assert market_curve != [], f"Curve input must not be an empty list."
+    assert len(market_curve) > 1, f"Curve input must contain more than one object!"
+    tenors = [object['tenor'] for object in market_curve]
+    rates = [object['rate'] for object in market_curve]
+    # Check correct type
+    assert all(isinstance(tenor, float) for tenor in tenors), f"Tenors must be of type float."
+    assert all(isinstance(rate, float) for rate in rates), f"Rates must be of type float."
+
     forward_curve = []
 
-    # WRITE TESTS FIRST.
-    for k in range(0, len(market_curve) - 1, 1):
-        if k < (forward_tenor -1):
-            continue
-        elif (k == forward_tenor - 1):
-            forward_curve.append(
-                {
-                    "settle_tenor": market_curve[k]['tenor'] - (forward_tenor/12),
-                    "workout_tenor": market_curve[k]['tenor'],
-                    "rate": market_curve[k]['rate']
-                }
-            )
-        else:
-            forward_curve.append(
-                {
-                    "settle_tenor": market_curve[k]['tenor'],
-                    "workout_tenor": market_curve[k + 1]['tenor'] - market_curve[k]['tenor'],
-                    "rate": implied_forward_rate(
-                        settlement = {
-                            "tenor": market_curve[k]
-                        }
-                    )
-                }
-            )
-
+    for k in range(0, len(market_curve) - 1):
+        # get the settlement object.
+        settlement_spot_tenor_object = market_curve[k]
+        settlement_tenor = settlement_spot_tenor_object['tenor']
+        settlement_rate = settlement_spot_tenor_object['rate']
+        # Check if there is a corresponding workout spot-tenor object.
+        workout_objects_filter = [
+            object for object in market_curve if object.get('tenor')==(settlement_tenor+forward_tenor)
+        ]
+        workout_object = workout_objects_filter[0] if len(workout_objects_filter) > 0 else continue
+        # If there is then calculate and add to the curve.
+        settle_tenor = market_curve[k]['tenor']
+                
     return forward_curve

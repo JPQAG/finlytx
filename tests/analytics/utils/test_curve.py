@@ -133,6 +133,77 @@ class BootstrapCurveTestCase(unittest.TestCase):
 
 class ForwardCurveTestCase(unittest.TestCase):
 
+    def test_forward_curve_empty_market_curve(self):
+        market_curve = []
+        
+        with self.assertRaises(Exception) as context:
+            forward_curve(
+                market_curve,
+                1
+            )
+        self.assertEqual(context.exception.args[0], "Curve input must not be an empty list.")
+        
+    def test_forward_curve_number_of_tenors_input(self):
+        market_curve = [
+            {
+                "tenor": 1,
+                "rate": 0.02548
+            }
+        ]
+        
+        with self.assertRaises(Exception) as context:
+            forward_curve(
+                market_curve,
+                1
+            )
+        self.assertEqual(context.exception.args[0], "Curve input must contain more than one object!")
+        
+    def test_forward_curve_object_contents_type_tenors(self):
+        market_curve = [
+            {
+                "tenor": 1,
+                "rate": 0.02548
+            },
+            {
+                "tenor": "2",
+                "rate": 0.02983
+            },
+            {
+                "tenor": 3,
+                "rate": 0.02891
+            }
+        ]
+        
+        with self.assertRaises(Exception) as context:
+            forward_curve(
+                market_curve,
+                1
+            )
+        self.assertEqual(context.exception.args[0], "Tenors must be of type float.")
+        
+    def test_forward_curve_object_contents_type_rates(self):
+        market_curve = [
+            {
+                "tenor": 1.00,
+                "rate": 0.02548
+            },
+            {
+                "tenor": 2.00,
+                "rate": "0.02983"
+            },
+            {
+                "tenor": 3.00,
+                "rate": 0.02891
+            }
+        ]
+        
+        with self.assertRaises(Exception) as context:
+            forward_curve(
+                market_curve,
+                1
+            )
+        self.assertEqual(context.exception.args[0], "Rates must be of type float.")
+
     def test_forward_curve(self):
 
         expected = [
@@ -150,15 +221,15 @@ class ForwardCurveTestCase(unittest.TestCase):
 
         market_curve = [
             {
-                "tenor": 1,
+                "tenor": 1.00,
                 "rate": 0.02548
             },
             {
-                "tenor": 2,
+                "tenor": 2.00,
                 "rate": 0.02983
             },
             {
-                "tenor": 3,
+                "tenor": 3.00,
                 "rate": 0.02891
             }
         ]

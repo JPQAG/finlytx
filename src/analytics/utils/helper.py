@@ -1,6 +1,6 @@
 import datetime
 from dateutil.relativedelta import relativedelta
-from typing import Dict, List
+from typing import  Any, Dict, List
 
 def calculate_years_between_dates(
     start_date: datetime.datetime,
@@ -43,3 +43,10 @@ def convert_date_series_to_years(
         )
 
     return new_series
+
+def get_dict_from_list(
+    dict_list: List[Dict],
+    key: str,
+    val: any
+) -> List[Dict]:
+    return

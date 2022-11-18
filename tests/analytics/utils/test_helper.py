@@ -36,3 +36,27 @@ class HelperTestCase(unittest.TestCase):
         result = convert_date_series_to_years(series, relative_date)
 
         self.assertEqual(result, MOCK_BENCHMARK_CURVE_AS_YEARS)
+        
+class GetDictFromListTestCase(unittest.TestCase):
+    
+    def test_filter_DictList(self):
+        
+        dict_list = [
+            {
+                "keyOne": "valOneOne",
+                "keyTwo": "valOneTwi",
+                "keyThree": "valOneThree"
+            },
+            {
+                "keyOne": "valTwoOne",
+                "keyTwo": "valTwoTwo",
+                "keyThree": "valTwoThree"
+            },
+            {
+                "keyOne": "valThreeOne",
+                "keyTwo": "valThreeTwo",
+                "keyThree": "valThreeThree"
+            }
+        ]
+        
+        

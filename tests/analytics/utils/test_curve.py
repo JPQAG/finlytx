@@ -283,6 +283,10 @@ class CurveSetTestCase(unittest.TestCase):
             market_curve,
             ["Q", "SA"]
         )
+        
+        self.assertTrue(len(result['interpolated_market_curve']) > 2)
+        self.assertTrue(len(result['zero_curve']) > 2)
+        self.assertTrue(len(result['forward_curves']) > 0)
     
     def test_curve_set_not_enough_data(self):
         pass

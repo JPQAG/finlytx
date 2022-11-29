@@ -1,3 +1,4 @@
+import math
 from typing import Dict, List
 import numpy as np
 import datetime
@@ -186,15 +187,16 @@ def forward_curve(
     
     forward_curve = []
     freq = FRACTION_OF_YEAR_TO_PERIOD_STRING[forward_tenor]
+    
+    tenor_diff = _get_tenor_diff(market_curve, forward_tenor)
 
-    for k in range(0, len(market_curve) - 1):
-        # get the settlement object.
+    for k in range(0, len(market_curve) - tenor_diff - 1):
         settlement_spot_tenor_object = market_curve[k]
         settlement_tenor = settlement_spot_tenor_object['tenor']
         settlement_rate = settlement_spot_tenor_object['rate']
         # Check if there is a corresponding workout spot-tenor object.
         workout_objects_filter = [
-            object for object in market_curve if object.get('tenor')==(settlement_tenor+forward_tenor)
+            object for object in market_curve if math.isclose(object.get('tenor'),(settlement_tenor+forward_tenor), abs_tol=0.040)
         ]
         workout_tenor = (settlement_tenor+forward_tenor)
         workout_object = get_dict_from_list(market_curve, "tenor", workout_tenor)
@@ -242,14 +244,14 @@ def curve_set(
         
     forward_curves = {}
     for tenor_string in forward_rate_set:
-        forward_curves.update(
-            { 
-                tenor_string: forward_curve(
-                    curve_set['interpolated_market_curve'], 
-                    TIMESERIES_TIME_PERIODS[tenor_string]['fraction_of_year']
-                )
-            }
-        )
+        forward_curves[tenor_string] = { 
+            tenor_string: forward_curve(
+                curve_set['interpolated_market_curve'], 
+                TIMESERIES_TIME_PERIODS[tenor_string]['fraction_of_year']
+            )
+        }
+    
+    curve_set['forward_curves'] = forward_curves
     
     return curve_set    
 
@@ -262,3 +264,12 @@ def _clean_curve_tenor_round(
             dict_value[k] = round(v, round_to)
             
     return curve
+
+def _get_tenor_diff(
+    market_curve: List[Dict],
+    forward_period: float
+) -> int:
+    first_element_tenor = market_curve[1]['tenor']
+    tenor_diff = int(forward_period/first_element_tenor)
+    
+    return tenor_diff

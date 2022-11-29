@@ -12,13 +12,16 @@ from src.analytics.utils.curve import (
     construct_nss_curve,
     nss_curve_output,
     convert_curve_dict_list_to_lists,
-    forward_curve
+    forward_curve,
+    curve_set,
+    _clean_curve_tenor_round
 )
 
 from ..helper.testConstants import (
     MOCK_BENCHMARK_CURVE,
     MOCK_BENCHMARK_CURVE_AS_YEARS, 
-    MOCK_BENCHMARK_CURVE_AS_YEARS_AS_LISTS
+    MOCK_BENCHMARK_CURVE_AS_YEARS_AS_LISTS,
+    MOCK_BENCHMARK_CURVE_CLEAN_TENOR
 )
 
 from src.analytics.utils.regression.calibrate import calibrate_ns_ols, calibrate_nss_ols
@@ -273,9 +276,28 @@ class ForwardCurveTestCase(unittest.TestCase):
 class CurveSetTestCase(unittest.TestCase):
     
     def test_curve_set_empty_curve(self):
-        pass
+        market_curve = MOCK_BENCHMARK_CURVE
+
+        result = curve_set(
+            datetime.datetime(1999, 1, 1),
+            market_curve,
+            ["Q", "SA"]
+        )
     
     def test_curve_set_not_enough_data(self):
         pass
     
+class CleanCurveTestCase(unittest.TestCase):
     
+    def test_clean_curve_tenor_round(self):
+    
+        market_curve = MOCK_BENCHMARK_CURVE
+        
+        constructed_curve = construct_ns_curve(datetime.datetime(1999, 1, 1), market_curve)
+        interpolated_market_curve = ns_curve_output(constructed_curve, np.linspace(0, 10, num=5).tolist())
+        
+        result = _clean_curve_tenor_round(interpolated_market_curve, 2)
+        
+        expected = MOCK_BENCHMARK_CURVE_CLEAN_TENOR
+        
+        self.assertEqual(result, expected)

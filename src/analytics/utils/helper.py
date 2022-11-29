@@ -1,4 +1,5 @@
 import datetime
+import math
 from dateutil.relativedelta import relativedelta
 from typing import  Any, Dict, List
 
@@ -15,7 +16,7 @@ def calculate_years_between_dates(
     Returns:
         float: The number of years between two dates.
     """
-    return relativedelta(end_date, start_date).years
+    return float(relativedelta(end_date, start_date).years)
 
 def convert_date_series_to_years(
     series: List[Dict],
@@ -44,6 +45,33 @@ def convert_date_series_to_years(
 
     return new_series
 
+def convert_date_series_to_years_tenor(
+    series: List[Dict],
+    relative_date: datetime.datetime
+) -> List[Dict]:
+    """Convert the date attribute in a series (list of dict) to a 
+        time attribute in years.
+
+    Args:
+        series (List[Dict]): List of dictionaries containing date attribute.
+        relative_date (datetime.datetime): Relative start date.
+
+    Returns:
+        List[Dict]: List of dictionaries containing time attribute (in years).
+    """
+
+    new_series = []
+
+    for obj in series:
+        new_series.append(
+            {
+                'tenor': calculate_years_between_dates(relative_date, obj['date']),
+                'rate': obj['rate']
+            }
+        )
+
+    return new_series
+
 def get_dict_from_list(
     dict_list: List[Dict],
     key_input: str,
@@ -55,7 +83,7 @@ def get_dict_from_list(
     assert not keys_lists or all(keys_lists[0] == b for b in keys_lists[1:]), f"Keys of dictionaries must match."
     assert key_input in keys_lists[0], f"Key not found in dicts."
     
-    filtered_list = [obj for obj in dict_list if obj[key_input] == val_input]
+    filtered_list = [obj for obj in dict_list if math.isclose(obj[key_input], val_input, abs_tol=0.0834)]
     
     assert len(filtered_list) != 0, f"Key/Val not found in provided list."
     assert len(filtered_list) == 1, f"More than one dictionary matched."

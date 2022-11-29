@@ -12,8 +12,11 @@ from src.analytics.utils.regression.ns import NelsonSiegelCurve
 from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
 
 from src.analytics.utils.regression.calibrate import calibrate_ns_ols, calibrate_nss_ols
-from src.analytics.utils.helper import convert_date_series_to_years, get_dict_from_list
-
+from src.analytics.utils.helper import (
+    convert_date_series_to_years, 
+    convert_date_series_to_years_tenor, 
+    get_dict_from_list
+)
 
 def construct_ns_curve(
     pricing_date: datetime.datetime,
@@ -193,7 +196,8 @@ def forward_curve(
         workout_objects_filter = [
             object for object in market_curve if object.get('tenor')==(settlement_tenor+forward_tenor)
         ]
-        workout_object = get_dict_from_list(market_curve, "tenor", settlement_tenor+forward_tenor)
+        workout_tenor = (settlement_tenor+forward_tenor)
+        workout_object = get_dict_from_list(market_curve, "tenor", workout_tenor)
         # If there is then calculate and add to the curve.
         if len(workout_objects_filter) > 0:
             workout_tenor = workout_object['tenor']
@@ -215,24 +219,46 @@ def curve_set(
     forward_rate_set: List[str],
     curve_type: CURVE_OPTIONS="NS"
 ) -> Dict:
+    assert curve_type in CURVE_OPTIONS, f"Curve type must be in {CURVE_OPTIONS}"
+    # assert forward_rate_set in FRACTION_OF_YEAR_TO_PERIOD_STRING.keys(), f"Forward rate set"
+    
     curve_set = {}
     
-    constructed_curve = None
-    interpolated_market_curve = None
     match curve_type:
         case "NS":
-            constructed_curve = construct_ns_curve(pricing_date, market_curve)
-            interpolated_market_curve = ns_curve_output(
-                constructed_curve, 
+            curve_set["constructed_curve"] = construct_ns_curve(pricing_date, market_curve)
+            curve_set["interpolated_market_curve"] = ns_curve_output(
+                curve_set["constructed_curve"], 
                 np.linspace(0, 30, num=30*12).tolist()
             )
         case "NSS":
-            constructed_curve = construct_nss_curve(pricing_date, market_curve)
-            interpolated_market_curve = ns_curve_output(
-                constructed_curve, 
+            curve_set["constructed_curve"] = construct_nss_curve(pricing_date, market_curve)
+            curve_set["interpolated_market_curve"] = nss_curve_output(
+                curve_set["constructed_curve"], 
                 np.linspace(0, 30, num=30*12).tolist()
             )
     
-    zero_curve = bootstrap_curve(interpolated_market_curve)
-    # TODO: this should be a dictionary containing all the requested forward period curves.
-    forward_curve = forward_curve()
+    curve_set["zero_curve"] = bootstrap_curve(curve_set["interpolated_market_curve"])
+        
+    forward_curves = {}
+    for tenor_string in forward_rate_set:
+        forward_curves.update(
+            { 
+                tenor_string: forward_curve(
+                    curve_set['interpolated_market_curve'], 
+                    TIMESERIES_TIME_PERIODS[tenor_string]['fraction_of_year']
+                )
+            }
+        )
+    
+    return curve_set    
+
+def _clean_curve_tenor_round(
+    curve: List[Dict],
+    round_to: int
+) -> List[Dict]:
+    for dict_value in curve:
+        for k, v in dict_value.items():
+            dict_value[k] = round(v, round_to)
+            
+    return curve

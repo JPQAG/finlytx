@@ -6,13 +6,13 @@ TIMESERIES_TIME_PERIODS = {
         "description": "annual",
         "annual_frequency": 1,
         "pd_frequency": DateOffset(years=1),
-        "fraction_of_year": 1.0
+        "fraction_of_year": 12/12
     },
     "SA": {
         "description": "semi-annual",
         "annual_frequency": 2,
         "pd_frequency": DateOffset(months=6),
-        "fraction_of_year": 0.50
+        "fraction_of_year": 6/12
     },
     "Q": {
         "description": "quarterly",
@@ -39,3 +39,4 @@ CURVE_OPTIONS = [
     "NS",
     "NSS"
 ]
+

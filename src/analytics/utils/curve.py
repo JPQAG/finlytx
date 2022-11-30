@@ -1,15 +1,23 @@
+import math
 from typing import Dict, List
 import numpy as np
 import datetime
 from src.analytics.utils.financial import implied_forward_rate
-from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
+from src.analytics.utils.lookup import (
+    TIMESERIES_TIME_PERIODS, 
+    FRACTION_OF_YEAR_TO_PERIOD_STRING,
+    CURVE_OPTIONS
+)
 
 from src.analytics.utils.regression.ns import NelsonSiegelCurve
 from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
 
 from src.analytics.utils.regression.calibrate import calibrate_ns_ols, calibrate_nss_ols
-from src.analytics.utils.helper import convert_date_series_to_years
-
+from src.analytics.utils.helper import (
+    convert_date_series_to_years, 
+    convert_date_series_to_years_tenor, 
+    get_dict_from_list
+)
 
 def construct_ns_curve(
     pricing_date: datetime.datetime,
@@ -41,6 +49,13 @@ def construct_ns_curve(
 
     return curve
 
+def ns_curve_output(
+    NelsonSiegelCurve: NelsonSiegelCurve,
+    tenor_range: list
+) -> list[Dict]:
+    y = NelsonSiegelCurve
+    return [{'tenor': tenor, 'rate': y(tenor)} for tenor in tenor_range]
+
 def construct_nss_curve(
     pricing_date: datetime.datetime,
     market_curve: List[Dict]
@@ -70,6 +85,13 @@ def construct_nss_curve(
     assert status.success
 
     return curve
+
+def nss_curve_output(
+    NelsonSiegelSvenssonCurve: NelsonSiegelSvenssonCurve,
+    tenor_range: list
+) -> List[Dict]:
+    y = NelsonSiegelSvenssonCurve
+    return [{'tenor': tenor, 'rate': y(tenor)} for tenor in tenor_range]
 
 def convert_curve_dict_list_to_lists(
     curve_dict_list: List[Dict]
@@ -160,23 +182,94 @@ def forward_curve(
     assert len(market_curve) > 1, f"Curve input must contain more than one object!"
     tenors = [object['tenor'] for object in market_curve]
     rates = [object['rate'] for object in market_curve]
-    # Check correct type
     assert all(isinstance(tenor, float) for tenor in tenors), f"Tenors must be of type float."
     assert all(isinstance(rate, float) for rate in rates), f"Rates must be of type float."
-
+    
     forward_curve = []
+    freq = FRACTION_OF_YEAR_TO_PERIOD_STRING[forward_tenor]
+    
+    tenor_diff = _get_tenor_diff(market_curve, forward_tenor)
 
-    for k in range(0, len(market_curve) - 1):
-        # get the settlement object.
+    for k in range(0, len(market_curve) - tenor_diff - 1):
         settlement_spot_tenor_object = market_curve[k]
         settlement_tenor = settlement_spot_tenor_object['tenor']
         settlement_rate = settlement_spot_tenor_object['rate']
         # Check if there is a corresponding workout spot-tenor object.
         workout_objects_filter = [
-            object for object in market_curve if object.get('tenor')==(settlement_tenor+forward_tenor)
+            object for object in market_curve if math.isclose(object.get('tenor'),(settlement_tenor+forward_tenor), abs_tol=0.040)
         ]
-        workout_object = workout_objects_filter[0] if len(workout_objects_filter) > 0 else continue
+        workout_tenor = (settlement_tenor+forward_tenor)
+        workout_object = get_dict_from_list(market_curve, "tenor", workout_tenor)
         # If there is then calculate and add to the curve.
-        settle_tenor = market_curve[k]['tenor']
+        if len(workout_objects_filter) > 0:
+            workout_tenor = workout_object['tenor']
+            workout_rate = workout_object['rate']
+            
+            forward_curve.append(
+                {
+                    "settle_tenor": settlement_tenor,
+                    "workout_tenor": workout_tenor,
+                    "rate": round(implied_forward_rate(settlement_spot_tenor_object, workout_object, freq), 5)
+                }
+            )
                 
     return forward_curve
+
+def curve_set(
+    pricing_date: datetime.datetime,
+    market_curve: List[Dict],
+    forward_rate_set: List[str],
+    curve_type: CURVE_OPTIONS="NS"
+) -> Dict:
+    assert curve_type in CURVE_OPTIONS, f"Curve type must be in {CURVE_OPTIONS}"
+    # assert forward_rate_set in FRACTION_OF_YEAR_TO_PERIOD_STRING.keys(), f"Forward rate set"
+    
+    curve_set = {}
+    
+    match curve_type:
+        case "NS":
+            curve_set["constructed_curve"] = construct_ns_curve(pricing_date, market_curve)
+            curve_set["interpolated_market_curve"] = ns_curve_output(
+                curve_set["constructed_curve"], 
+                np.linspace(0, 30, num=30*12).tolist()
+            )
+        case "NSS":
+            curve_set["constructed_curve"] = construct_nss_curve(pricing_date, market_curve)
+            curve_set["interpolated_market_curve"] = nss_curve_output(
+                curve_set["constructed_curve"], 
+                np.linspace(0, 30, num=30*12).tolist()
+            )
+    
+    curve_set["zero_curve"] = bootstrap_curve(curve_set["interpolated_market_curve"])
+        
+    forward_curves = {}
+    for tenor_string in forward_rate_set:
+        forward_curves[tenor_string] = { 
+            tenor_string: forward_curve(
+                curve_set['interpolated_market_curve'], 
+                TIMESERIES_TIME_PERIODS[tenor_string]['fraction_of_year']
+            )
+        }
+    
+    curve_set['forward_curves'] = forward_curves
+    
+    return curve_set    
+
+def _clean_curve_tenor_round(
+    curve: List[Dict],
+    round_to: int
+) -> List[Dict]:
+    for dict_value in curve:
+        for k, v in dict_value.items():
+            dict_value[k] = round(v, round_to)
+            
+    return curve
+
+def _get_tenor_diff(
+    market_curve: List[Dict],
+    forward_period: float
+) -> int:
+    first_element_tenor = market_curve[1]['tenor']
+    tenor_diff = int(forward_period/first_element_tenor)
+    
+    return tenor_diff

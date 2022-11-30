@@ -2,18 +2,26 @@ import unittest
 import datetime
 import numpy as np
 
+from src.analytics.utils.regression.ns import NelsonSiegelCurve
+from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
+
 from src.analytics.utils.curve import (
     bootstrap_curve,
     construct_ns_curve,
+    ns_curve_output,
     construct_nss_curve,
+    nss_curve_output,
     convert_curve_dict_list_to_lists,
-    forward_curve
+    forward_curve,
+    curve_set,
+    _clean_curve_tenor_round
 )
 
 from ..helper.testConstants import (
     MOCK_BENCHMARK_CURVE,
     MOCK_BENCHMARK_CURVE_AS_YEARS, 
-    MOCK_BENCHMARK_CURVE_AS_YEARS_AS_LISTS
+    MOCK_BENCHMARK_CURVE_AS_YEARS_AS_LISTS,
+    MOCK_BENCHMARK_CURVE_CLEAN_TENOR
 )
 
 from src.analytics.utils.regression.calibrate import calibrate_ns_ols, calibrate_nss_ols
@@ -36,6 +44,18 @@ class CurveTestCase(unittest.TestCase):
 
         self.assertEqual(result, expected)
 
+    def test_ns_curve_output(self):
+        market_curve = MOCK_BENCHMARK_CURVE
+
+        result = construct_ns_curve(
+            datetime.datetime(1999, 1, 1),
+            market_curve
+        )
+        
+        result = ns_curve_output(result, np.linspace(0, 30, num=30*12).tolist())
+        
+        self.assertEqual(result[12], {'tenor': 1.0027855153203342, 'rate': -0.006983785586190569})
+
     def test_construct_nss_curve(self):
 
         market_curve = MOCK_BENCHMARK_CURVE
@@ -53,6 +73,18 @@ class CurveTestCase(unittest.TestCase):
 
         self.assertEqual(result, expected)
 
+    def test_nss_curve_output(self):
+        market_curve = MOCK_BENCHMARK_CURVE
+
+        result = construct_nss_curve(
+            datetime.datetime(1999, 1, 1),
+            market_curve
+        )
+        
+        result = nss_curve_output(result, np.linspace(0, 30, num=30*12).tolist())
+        
+        self.assertEqual(result[12], {'tenor': 1.0027855153203342, 'rate': 0.004595117271485261})
+
     def test_convert_curve_dict_list_to_list(self):
 
         result = convert_curve_dict_list_to_lists(MOCK_BENCHMARK_CURVE_AS_YEARS)
@@ -63,7 +95,7 @@ class BootstrapCurveTestCase(unittest.TestCase):
 
     def test_boostrap_curve(self):
         """CFA LEVEL 2 - CFA 2018.
-        Fixed Income - Spot Rates and Forward Rates.
+        Fixed Income - Spot Rates and Forward Rates. Constructing the zero curve from market/spot/par.
         """
 
         curve = [
@@ -208,13 +240,13 @@ class ForwardCurveTestCase(unittest.TestCase):
 
         expected = [
             {
-                "settle_tenor": 1,
-                "workout_tenor": 2,
-                "rate": 0.03419
+                "settle_tenor": 1.0,
+                "workout_tenor": 2.0,
+                "rate": 0.03420
             },
             {
-                "settle_tenor": 2,
-                "workout_tenor": 3,
+                "settle_tenor": 2.0,
+                "workout_tenor": 3.0,
                 "rate": 0.02707
             }
         ]
@@ -239,4 +271,37 @@ class ForwardCurveTestCase(unittest.TestCase):
             1
         )
 
+        self.assertEqual(result, expected)
+
+class CurveSetTestCase(unittest.TestCase):
+    
+    def test_curve_set_empty_curve(self):
+        market_curve = MOCK_BENCHMARK_CURVE
+
+        result = curve_set(
+            datetime.datetime(1999, 1, 1),
+            market_curve,
+            ["Q", "SA"]
+        )
+        
+        self.assertTrue(len(result['interpolated_market_curve']) > 2)
+        self.assertTrue(len(result['zero_curve']) > 2)
+        self.assertTrue(len(result['forward_curves']) > 0)
+    
+    def test_curve_set_not_enough_data(self):
+        pass
+    
+class CleanCurveTestCase(unittest.TestCase):
+    
+    def test_clean_curve_tenor_round(self):
+    
+        market_curve = MOCK_BENCHMARK_CURVE
+        
+        constructed_curve = construct_ns_curve(datetime.datetime(1999, 1, 1), market_curve)
+        interpolated_market_curve = ns_curve_output(constructed_curve, np.linspace(0, 10, num=5).tolist())
+        
+        result = _clean_curve_tenor_round(interpolated_market_curve, 2)
+        
+        expected = MOCK_BENCHMARK_CURVE_CLEAN_TENOR
+        
         self.assertEqual(result, expected)

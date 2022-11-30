@@ -168,6 +168,8 @@ MOCK_BENCHMARK_CURVE_AS_YEARS = [
     }
 ]
 
+MOCK_BENCHMARK_CURVE_CLEAN_TENOR = [{'tenor': 0.0, 'rate': -0.03}, {'tenor': 2.5, 'rate': 0.02}, {'tenor': 5.0, 'rate': 0.03}, {'tenor': 7.5, 'rate': 0.04}, {'tenor': 10.0, 'rate': 0.05}]
+
 MOCK_BENCHMARK_CURVE_AS_YEARS_AS_LISTS = [
     [
         2.0,

@@ -83,7 +83,10 @@ def get_dict_from_list(
     assert not keys_lists or all(keys_lists[0] == b for b in keys_lists[1:]), f"Keys of dictionaries must match."
     assert key_input in keys_lists[0], f"Key not found in dicts."
     
-    filtered_list = [obj for obj in dict_list if math.isclose(obj[key_input], val_input, abs_tol=0.040)]
+    if (isinstance(dict_list[0][key_input], float)):
+        filtered_list = [obj for obj in dict_list if math.isclose(obj[key_input], val_input, abs_tol=0.040)]
+    else:
+        filtered_list = [obj for obj in dict_list if obj[key_input] == val_input]
     
     assert len(filtered_list) != 0, f"Key/Val not found in provided list."
     assert len(filtered_list) == 1, f"More than one dictionary matched."

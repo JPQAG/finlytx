@@ -1,5 +1,7 @@
 import pandas as pd
 from pandas.tseries.offsets import DateOffset
+from src.analytics.utils.regression.ns import NelsonSiegelCurve
+from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
 
 TIMESERIES_TIME_PERIODS = {
     "A": {
@@ -38,5 +40,10 @@ FRACTION_OF_YEAR_TO_PERIOD_STRING = {
 CURVE_OPTIONS = [
     "NS",
     "NSS"
+]
+
+CURVE_OPTIONS_OBJECTS = [
+    NelsonSiegelCurve,
+    NelsonSiegelSvenssonCurve
 ]
 

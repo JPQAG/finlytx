@@ -128,16 +128,35 @@ def generate_cashflows(
 
     for date in date_range:
         date_formatted = datetime.datetime.strptime(date, "%Y-%m-%d")
-        variable_coupon_component = _get_variable_coupon_component(pricing_date, date_formatted, underlying_curve)/annual_frequency
-        fixed_coupon_component = coupon_rate_or_margin/annual_frequency*face_value
-        principal_component = face_value * (1 + redemption_discount) if date == date_range[-1] else 0
         
-        cashflow = variable_coupon_component + fixed_coupon_component + principal_component
+        principal_component = face_value * (1 + redemption_discount) if date == date_range[-1] else 0
+        amortising_component = 0
+        total_principal = principal_component + amortising_component
+        
+        variable_coupon_component = 0
+        if (variable_coupon):
+            variable_coupon_component = (_get_variable_coupon_component(pricing_date, date_formatted, underlying_curve) * face_value)/annual_frequency
+        fixed_coupon_component = coupon_rate_or_margin/annual_frequency*face_value
+        total_coupon = fixed_coupon_component + variable_coupon_component
+        
+        total_cashflow = variable_coupon_component + fixed_coupon_component + principal_component
         
         cashflows_array.append(
             {
                 'date': date,
-                'cashflow': cashflow
+                'cashflow': {
+                    'total': total_cashflow,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': fixed_coupon_component,
+                        'variable_coupon_interest_component': variable_coupon_component,
+                        'total_coupon_interest': total_coupon,
+                    },
+                    'principal': {
+                        'redemption_principal': principal_component,
+                        'amortising': amortising_component,
+                        'total_principal': total_principal
+                    }
+                }
             }
         )
 
@@ -157,7 +176,7 @@ def _get_variable_coupon_component(
     
     annual_variable_coupon_component = underlying_forward_curve(workout_tenor)
     
-    return annual_variable_coupon_component
+    return annual_variable_coupon_component/100
 
 
 def get_most_recent_cashflow(
@@ -184,3 +203,4 @@ def get_most_recent_cashflow(
         most_recent_cashflow = cashflow if cashflow["date"] <= reference_date else most_recent_cashflow
     
     return most_recent_cashflow
+

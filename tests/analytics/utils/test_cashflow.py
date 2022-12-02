@@ -1,5 +1,6 @@
 import unittest
 import datetime
+import numpy as np
 from src.analytics.utils.cashflow import (
     generate_cashflows,
     get_most_recent_cashflow,
@@ -11,7 +12,14 @@ from src.analytics.utils.cashflow import (
 )
 from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS, CURVE_OPTIONS
 
-from ..helper.testConstants import MOCK_CASHFLOW_AND_DISCOUNT_CURVE, MOCK_DISCOUNT_CURVE, MOCK_SECURITY_CASHFLOW_ARRAY, MOCK_SECURITY_FIXED_RATE_CASHFLOW_ARRAY
+from ..helper.testConstants import (
+    MOCK_CASHFLOW_AND_DISCOUNT_CURVE, 
+    MOCK_DISCOUNT_CURVE, 
+    MOCK_SECURITY_CASHFLOW_ARRAY, 
+    MOCK_SECURITY_FIXED_RATE_CASHFLOW_ARRAY,
+    MOCK_NSS_CURVE_PARAMETERS,
+    MOCK_NSS_CURVE_RESULT
+)
 
 from src.analytics.utils.regression.ns import NelsonSiegelCurve
 from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
@@ -55,9 +63,6 @@ class CashflowTestCase(unittest.TestCase):
             get_most_recent_cashflow(datetime.datetime(2001,4,1), [])
 
 class GenerateCashflowTestCase(unittest.TestCase):
-
-    # Test Cases
-    ## Fixed
         
     def test_generate_cashflows_args_error_start_date_type_incorrect(self):
 
@@ -122,47 +127,179 @@ class GenerateCashflowTestCase(unittest.TestCase):
         expected = [
             {
                 'date': "2000-02-01",
-                'cashflow': coupon_rate_periodic * 100
+                'cashflow': {
+                    'total': coupon_rate_periodic * 100,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_rate_periodic * 100,
+                        'variable_coupon_interest_component': 0,
+                        'total_coupon_interest': coupon_rate_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 0,
+                        'amortising': 0,
+                        'total_principal': 0
+                    }
+                }
             },
             {
                 'date': "2000-03-01",
-                'cashflow': coupon_rate_periodic * 100
+                'cashflow': {
+                    'total': coupon_rate_periodic * 100,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_rate_periodic * 100,
+                        'variable_coupon_interest_component': 0,
+                        'total_coupon_interest': coupon_rate_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 0,
+                        'amortising': 0,
+                        'total_principal': 0
+                    }
+                }
             },
             {
                 'date': "2000-04-01",
-                'cashflow': coupon_rate_periodic * 100
+                'cashflow': {
+                    'total': coupon_rate_periodic * 100,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_rate_periodic * 100,
+                        'variable_coupon_interest_component': 0,
+                        'total_coupon_interest': coupon_rate_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 0,
+                        'amortising': 0,
+                        'total_principal': 0
+                    }
+                }
             },
             {
                 'date': "2000-05-01",
-                'cashflow': coupon_rate_periodic * 100
+                'cashflow': {
+                    'total': coupon_rate_periodic * 100,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_rate_periodic * 100,
+                        'variable_coupon_interest_component': 0,
+                        'total_coupon_interest': coupon_rate_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 0,
+                        'amortising': 0,
+                        'total_principal': 0
+                    }
+                }
             },
             {
                 'date': "2000-06-01",
-                'cashflow': coupon_rate_periodic * 100
+                'cashflow': {
+                    'total': coupon_rate_periodic * 100,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_rate_periodic * 100,
+                        'variable_coupon_interest_component': 0,
+                        'total_coupon_interest': coupon_rate_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 0,
+                        'amortising': 0,
+                        'total_principal': 0
+                    }
+                }
             },
             {
                 'date': "2000-07-01",
-                'cashflow': coupon_rate_periodic * 100
+                'cashflow': {
+                    'total': coupon_rate_periodic * 100,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_rate_periodic * 100,
+                        'variable_coupon_interest_component': 0,
+                        'total_coupon_interest': coupon_rate_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 0,
+                        'amortising': 0,
+                        'total_principal': 0
+                    }
+                }
             },
             {
                 'date': "2000-08-01",
-                'cashflow': coupon_rate_periodic * 100
+                'cashflow': {
+                    'total': coupon_rate_periodic * 100,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_rate_periodic * 100,
+                        'variable_coupon_interest_component': 0,
+                        'total_coupon_interest': coupon_rate_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 0,
+                        'amortising': 0,
+                        'total_principal': 0
+                    }
+                }
             },
             {
                 'date': "2000-09-01",
-                'cashflow': coupon_rate_periodic * 100
+                'cashflow': {
+                    'total': coupon_rate_periodic * 100,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_rate_periodic * 100,
+                        'variable_coupon_interest_component': 0,
+                        'total_coupon_interest': coupon_rate_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 0,
+                        'amortising': 0,
+                        'total_principal': 0
+                    }
+                }
             },
             {
                 'date': "2000-10-01",
-                'cashflow': coupon_rate_periodic * 100
+                'cashflow': {
+                    'total': coupon_rate_periodic * 100,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_rate_periodic * 100,
+                        'variable_coupon_interest_component': 0,
+                        'total_coupon_interest': coupon_rate_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 0,
+                        'amortising': 0,
+                        'total_principal': 0
+                    }
+                }
             },
             {
                 'date': "2000-11-01",
-                'cashflow': coupon_rate_periodic * 100
+                'cashflow': {
+                    'total': coupon_rate_periodic * 100,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_rate_periodic * 100,
+                        'variable_coupon_interest_component': 0,
+                        'total_coupon_interest': coupon_rate_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 0,
+                        'amortising': 0,
+                        'total_principal': 0
+                    }
+                }
             },
             {
                 'date': "2000-12-01",
-                'cashflow': (coupon_rate_periodic * 100) + 100
+                'cashflow': {
+                    'total': coupon_rate_periodic * 100 + 100,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_rate_periodic * 100,
+                        'variable_coupon_interest_component': 0,
+                        'total_coupon_interest': coupon_rate_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 100,
+                        'amortising': 0,
+                        'total_principal': 100
+                    }
+                }
             }
         ]
 
@@ -183,7 +320,19 @@ class GenerateCashflowTestCase(unittest.TestCase):
         expected = [
             {
                 'date': "2001-01-01",
-                'cashflow': (coupon_rate_periodic * 100) + 100
+                'cashflow': {
+                    'total': coupon_rate_periodic * 100 + 100,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_rate_periodic * 100,
+                        'variable_coupon_interest_component': 0,
+                        'total_coupon_interest': coupon_rate_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 100,
+                        'amortising': 0,
+                        'total_principal': 100
+                    }
+                }
             }
         ]
 
@@ -197,33 +346,167 @@ class GenerateCashflowTestCase(unittest.TestCase):
 
         self.assertEqual(result, expected)
 
-    ## Floating
-    def test_generate_annual_fixed_cashflows(self):
+    def test_generate_annual_floating_cashflows(self):
         
         coupon_margin_periodic = 0.03/1
 
         expected = [
             {
                 'date': "2001-01-01",
-                'cashflow': (coupon_margin_periodic * 100) + 100
+                'cashflow': {
+                    'total': round((coupon_margin_periodic * 100) + 100 + MOCK_NSS_CURVE_RESULT[0], 4),
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_margin_periodic * 100,
+                        'variable_coupon_interest_component': MOCK_NSS_CURVE_RESULT[0],
+                        'total_coupon_interest': coupon_margin_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 100,
+                        'amortising': 0,
+                        'total_principal': 100
+                    }
+                },
             }
         ]
+        expected_dates = [dictionary['date'] for dictionary in expected]
+        expected_total_cashflows = [dictionary['cashflow']['total'] for dictionary in expected]
+        expected_total_fixed_cashflows = [
+            dictionary['cashflow']['coupon_interest']['fixed_coupon_interest_component']
+            for
+            dictionary in expected
+        ]
+        expected_total_variable_cashflows = [
+            dictionary['cashflow']['coupon_interest']['variable_coupon_interest_component']
+            for
+            dictionary in expected
+        ]
         
+        nss_params = MOCK_NSS_CURVE_PARAMETERS
+
         result = generate_cashflows(
             start_date = datetime.datetime.strptime("2000-01-01", "%Y-%m-%d"),
             end_date = datetime.datetime.strptime("2001-01-01", "%Y-%m-%d"),
             cashflow_freq = "A",
             face_value = 100.00,
-            coupon_rate_or_margin = 0.03,
+            coupon_rate_or_margin = coupon_margin_periodic,
             variable_coupon=True,
-            
+            underlying_curve = NelsonSiegelSvenssonCurve(
+                nss_params[0], 
+                nss_params[1], 
+                nss_params[2], 
+                nss_params[3],
+                nss_params[4],
+                nss_params[5]
+            ),
+            pricing_date=datetime.datetime.strptime("2000-01-01", "%Y-%m-%d")
         )
+        result_dates = [dictionary['date'] for dictionary in result]
+        result_total_cashflows = [round(dictionary['cashflow']['total'], 4) for dictionary in result]
+        result_total_fixed_cashflows = [
+            round(dictionary['cashflow']['coupon_interest']['fixed_coupon_interest_component'], 4)
+            for
+            dictionary in result
+        ]
+        result_total_variable_cashflows = [
+            round(dictionary['cashflow']['coupon_interest']['variable_coupon_interest_component'], 4)
+            for
+            dictionary in result
+        ]
         
-        self.assertEqual(result, expected)
-    
-    ## Arrears
-    ## Advance
+        self.assertTrue(np.allclose(result_total_cashflows, expected_total_cashflows, atol=1e-03))
+        self.assertTrue(np.allclose(result_total_fixed_cashflows, expected_total_fixed_cashflows, atol=1e-03))
+        self.assertTrue(np.allclose(result_total_variable_cashflows, expected_total_variable_cashflows, atol=1e-03))
+        self.assertEqual(result_dates, expected_dates)
+        
+    def test_generate_annual_floating_cashflows_2Y(self):
+        
+        coupon_margin_periodic = 0.03/1
 
+        expected = [
+            {
+                'date': "2001-01-01",
+                'cashflow': {
+                    'total': round((coupon_margin_periodic * 100) + MOCK_NSS_CURVE_RESULT[0], 4),
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_margin_periodic * 100,
+                        'variable_coupon_interest_component': MOCK_NSS_CURVE_RESULT[0],
+                        'total_coupon_interest': coupon_margin_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 0,
+                        'amortising': 0,
+                        'total_principal': 0
+                    }
+                },
+            },
+            {
+                'date': "2002-01-01",
+                'cashflow': round((coupon_margin_periodic * 100) + 100 + MOCK_NSS_CURVE_RESULT[1], 4),
+                'cashflow': {
+                    'total': round((coupon_margin_periodic * 100) + 100 + MOCK_NSS_CURVE_RESULT[1], 4),
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': coupon_margin_periodic * 100,
+                        'variable_coupon_interest_component': MOCK_NSS_CURVE_RESULT[1],
+                        'total_coupon_interest': coupon_margin_periodic * 100,
+                    },
+                    'principal': {
+                        'redemption_principal': 100,
+                        'amortising': 0,
+                        'total_principal': 100
+                    }
+                }
+            }
+        ]
+        expected_dates = [dictionary['date'] for dictionary in expected]
+        expected_total_cashflows = [dictionary['cashflow']['total'] for dictionary in expected]
+        expected_total_fixed_cashflows = [
+            dictionary['cashflow']['coupon_interest']['fixed_coupon_interest_component']
+            for
+            dictionary in expected
+        ]
+        expected_total_variable_cashflows = [
+            dictionary['cashflow']['coupon_interest']['variable_coupon_interest_component']
+            for
+            dictionary in expected
+        ]
+        
+        nss_params = MOCK_NSS_CURVE_PARAMETERS
+
+        result = generate_cashflows(
+            start_date = datetime.datetime.strptime("2000-01-01", "%Y-%m-%d"),
+            end_date = datetime.datetime.strptime("2002-01-01", "%Y-%m-%d"),
+            cashflow_freq = "A",
+            face_value = 100.00,
+            coupon_rate_or_margin = coupon_margin_periodic,
+            variable_coupon=True,
+            underlying_curve = NelsonSiegelSvenssonCurve(
+                nss_params[0], 
+                nss_params[1], 
+                nss_params[2], 
+                nss_params[3],
+                nss_params[4],
+                nss_params[5]
+            ),
+            pricing_date=datetime.datetime.strptime("2000-01-01", "%Y-%m-%d")
+        )
+        result_dates = [dictionary['date'] for dictionary in result]
+        result_total_cashflows = [round(dictionary['cashflow']['total'], 4) for dictionary in result]
+        result_total_fixed_cashflows = [
+            round(dictionary['cashflow']['coupon_interest']['fixed_coupon_interest_component'], 4)
+            for
+            dictionary in result
+        ]
+        result_total_variable_cashflows = [
+            round(dictionary['cashflow']['coupon_interest']['variable_coupon_interest_component'], 4)
+            for
+            dictionary in result
+        ]
+        
+        self.assertTrue(np.allclose(result_total_cashflows, expected_total_cashflows, atol=1e-03))
+        self.assertTrue(np.allclose(result_total_fixed_cashflows, expected_total_fixed_cashflows, atol=1e-03))
+        self.assertTrue(np.allclose(result_total_variable_cashflows, expected_total_variable_cashflows, atol=1e-03))
+        self.assertEqual(result_dates, expected_dates)
+    
 class GenerateVariableCouponComponent(unittest.TestCase):
     
     def test_get_variable_coupon_component_input_type_pricing_date(self):
@@ -285,8 +568,59 @@ class GenerateVariableCouponComponent(unittest.TestCase):
             curve
         )
         
-        self.assertEqual(round(result, 5), expected)
+        self.assertEqual(round(result, 5), round(expected/100, 5))
         
+    def test_get_variable_coupon_component_nss(self):
         
+                
+        pricing_date = datetime.datetime.strptime("2000-01-01", "%Y-%m-%d")
+        coupon_payment_date = datetime.datetime.strptime("2001-01-01", "%Y-%m-%d")
         
+        nss_params = MOCK_NSS_CURVE_PARAMETERS
+        
+        curve = NelsonSiegelSvenssonCurve(
+            nss_params[0], 
+            nss_params[1], 
+            nss_params[2], 
+            nss_params[3],
+            nss_params[4],
+            nss_params[5]
+        )
+        
+        expected = MOCK_NSS_CURVE_RESULT[0]
+        
+        result = _get_variable_coupon_component(
+            pricing_date,
+            coupon_payment_date,
+            curve
+        )
+        
+        self.assertAlmostEqual(result, expected/100, 5)
+        
+    def test_get_variable_coupon_component_nss_two(self):
+        
+                
+        pricing_date = datetime.datetime.strptime("2000-01-01", "%Y-%m-%d")
+        coupon_payment_date = datetime.datetime.strptime("2002-01-01", "%Y-%m-%d")
+        
+        nss_params = MOCK_NSS_CURVE_PARAMETERS
+        
+        curve = NelsonSiegelSvenssonCurve(
+            nss_params[0], 
+            nss_params[1], 
+            nss_params[2], 
+            nss_params[3],
+            nss_params[4],
+            nss_params[5]
+        )
+        
+        expected = MOCK_NSS_CURVE_RESULT[1]
+        
+        result = _get_variable_coupon_component(
+            pricing_date,
+            coupon_payment_date,
+            curve
+        )
+        
+        self.assertAlmostEqual(result, expected/100, 5)
         

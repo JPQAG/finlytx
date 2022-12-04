@@ -2,12 +2,13 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from typing import Dict, List
 
-from src.analytics.utils.date_time import generate_date_range, years_between_dates
-from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
-
-
-def generate_cashflows() -> None:
-    pass
+from src.analytics.utils.date_time import generate_date_range, years_between_dates, get_record_date
+from src.analytics.utils.lookup import (
+    TIMESERIES_TIME_PERIODS,
+    CURVE_OPTIONS,
+    CURVE_OPTIONS_OBJECTS
+)
+from src.analytics.utils.regression.ns import NelsonSiegelCurve
 
 def match_cashflow_to_discount_curve(
     cashflows: List[Dict],
@@ -85,15 +86,22 @@ def generate_cashflows(
     end_date: datetime.datetime,
     cashflow_freq: float,
     face_value: float,
-    coupon_rate: float,
+    coupon_rate_or_margin: float,
     arrears: bool=True,
     variable_coupon: bool=False,
-    underlying_curve: List=[],
-    redemption_discount: float=0.00
+    underlying_curve: CURVE_OPTIONS_OBJECTS = NelsonSiegelCurve(0,0,0,0),
+    redemption_discount: float=0.00,
+    pricing_date=datetime.datetime.today(),
+    ex_record_config: Dict={}
 ) -> List[Dict]:
     """Generates cashflows from a start_date to end_date. 
 
     *The end_date specifies the final cashflow date. Thus the start of subsequent periods is the day after the cashflow date (in arrears).
+    
+    With variable coupons:
+        - Variable coupon can arise from a number of different types of securities.
+        - How do we deal with floating rate notes vs step-up coupons?
+        - Generate a benchmark/underlying array to be added to the coupon_rate?
 
     Args:
         starting_date (datetime.datetime): Starting date of the first period.
@@ -110,27 +118,70 @@ def generate_cashflows(
     """
     assert all(isinstance(date, (datetime.datetime)) for date in [start_date, end_date]), f"Date arguments must be of type datetime."
     assert cashflow_freq in TIMESERIES_TIME_PERIODS.keys(), f"'{cashflow_freq}' is not in {TIMESERIES_TIME_PERIODS.keys()}."
-    assert all(isinstance(float_val, float) for float_val in [face_value, coupon_rate, redemption_discount]), f"Numeric args must be of float type."
-    # TODO: FLOATING RATE
+    assert all(isinstance(float_val, float) for float_val in [face_value, coupon_rate_or_margin, redemption_discount]), f"Numeric args must be of float type."
 
     date_range = generate_date_range(start_date, end_date, freq_input=cashflow_freq)
     annual_frequency = TIMESERIES_TIME_PERIODS[cashflow_freq]['annual_frequency']
     cashflows_array = []
 
     for date in date_range:
-        coupon_rate_periodic = "_get_variable_cashflow(date, underlying_curve)" if variable_coupon else (coupon_rate/annual_frequency)
-        if date == date_range[-1]:
-            cashflow = ( face_value * coupon_rate_periodic ) + face_value
-        else:
-            cashflow = ( face_value * coupon_rate_periodic )
+        date_formatted = datetime.datetime.strptime(date, "%Y-%m-%d")
+        record_date = get_record_date(date_formatted, ex_record_config)
+        ex_date = (record_date - datetime.timedelta(days=1))
+        
+        principal_component = face_value * (1 + redemption_discount) if date == date_range[-1] else 0
+        amortising_component = 0
+        total_principal = principal_component + amortising_component
+        
+        variable_coupon_component = 0
+        if (variable_coupon):
+            variable_coupon_component = (_get_variable_coupon_component(pricing_date, date_formatted, underlying_curve) * face_value)/annual_frequency
+        fixed_coupon_component = coupon_rate_or_margin/annual_frequency*face_value
+        total_coupon = fixed_coupon_component + variable_coupon_component
+        
+        total_cashflow = variable_coupon_component + fixed_coupon_component + principal_component
+        
         cashflows_array.append(
             {
-                'date': date,
-                'cashflow': cashflow
+                'date': {
+                    "payment_date": date,
+                    "record_date": record_date.strftime("%Y-%m-%d"),
+                    "ex_date": ex_date.strftime("%Y-%m-%d")
+                },
+                'cashflow': {
+                    'total': total_cashflow,
+                    'coupon_interest': {
+                        'fixed_coupon_interest_component': fixed_coupon_component,
+                        'variable_coupon_interest_component': variable_coupon_component,
+                        'total_coupon_interest': total_coupon,
+                    },
+                    'principal': {
+                        'redemption_principal': principal_component,
+                        'amortising': amortising_component,
+                        'total_principal': total_principal
+                    }
+                }
             }
         )
 
     return cashflows_array
+
+def _get_variable_coupon_component(
+    pricing_date: datetime.datetime,
+    workout_date: datetime.datetime,
+    underlying_forward_curve: CURVE_OPTIONS_OBJECTS=NelsonSiegelCurve
+) -> float:
+    assert isinstance(pricing_date, datetime.datetime), f"pricing_date must be of type datetime.datetime."
+    assert isinstance(workout_date, datetime.datetime), f"workout_date must be of type datetime.datetime."
+    curve_type_options = tuple(CURVE_OPTIONS_OBJECTS)
+    assert isinstance(underlying_forward_curve, tuple(CURVE_OPTIONS_OBJECTS)), f"underlying_forward_curve must be one of {CURVE_OPTIONS} as objects."
+    
+    workout_tenor = years_between_dates(pricing_date, workout_date)
+    
+    annual_variable_coupon_component = underlying_forward_curve(workout_tenor)
+    
+    return annual_variable_coupon_component/100
+
 
 def get_most_recent_cashflow(
     reference_date: datetime.datetime,
@@ -156,3 +207,4 @@ def get_most_recent_cashflow(
         most_recent_cashflow = cashflow if cashflow["date"] <= reference_date else most_recent_cashflow
     
     return most_recent_cashflow
+

@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime
+from datetime import datetime, time
 import pandas as pd
 
 from src.analytics.utils.date_time import (
@@ -12,7 +12,9 @@ from src.analytics.utils.date_time import (
     generate_date_range,
     months_between_dates,
     years_between_dates,
-    days_between_dates
+    days_between_dates,
+    get_days_before_date,
+    get_record_date
 )
 from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
 
@@ -37,6 +39,14 @@ class DateTimeTestCase(unittest.TestCase):
         self.assertEqual(round(years_between_dates(datetime(2010, 10, 1), datetime(2009, 11, 1)), 4), -0.9151)
         self.assertEqual(round(years_between_dates(datetime(2010, 10, 1), datetime(2009, 8, 1)), 4), -1.1671)
         self.assertEqual(round(years_between_dates(datetime(2000, 1, 1), datetime(2010, 1, 1)), 0), 10)
+
+    def test_get_days_before_date(self):
+        
+        start_date = datetime.strptime("2001-01-01", "%Y-%m-%d")
+        num_days = 8
+        expected_date = datetime.strptime("2000-12-24", "%Y-%m-%d")
+        
+        self.assertEqual(get_days_before_date(start_date, num_days), expected_date)
 
 class DateTimeRangeTestCase(unittest.TestCase):
 
@@ -376,3 +386,20 @@ class DateTimeRangeTestCase(unittest.TestCase):
             _default_date("01-01-2000")
         
         self.assertEqual(_default_date("2000-01-01"), datetime.strptime("2000-01-01", "%Y-%m-%d"), "Normal case failed.")
+
+class ExRecordDateTestCase(unittest.TestCase):
+    
+    def test_get_record_date(self):
+        
+        payment_date = datetime.strptime("2001-01-01", "%Y-%m-%d")
+        ex_record_config = {
+            "record_date": {
+                "days_before_payment_date": 8,
+                "record_time": 19,
+                "day_type": "calendar",
+                "time_of_record": time(19)
+            }
+        }
+        expected_date = datetime.strptime("2000-12-24", "%Y-%m-%d")
+        
+        self.assertEqual(get_record_date(payment_date, ex_record_config), expected_date)

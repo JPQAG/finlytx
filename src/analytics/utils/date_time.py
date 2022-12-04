@@ -7,6 +7,22 @@ from pandas.tseries.offsets import DateOffset
 
 from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
 
+def get_days_before_date(
+    start_date: datetime.datetime,
+    number_of_days: int,
+    is_calendar_days: bool=True
+) -> datetime.datetime:
+    return (start_date - datetime.timedelta(days=number_of_days))
+
+def get_record_date(
+    payment_date: datetime.datetime,
+    ex_record_config: dict
+) -> datetime.datetime:
+    
+    num_days = ex_record_config['record_date']['days_before_payment_date']
+    
+    return get_days_before_date(payment_date, num_days)
+
 def days_between_dates(first_date: datetime.datetime, second_date: datetime.datetime) -> float:
     """Time between two dates in days.
 

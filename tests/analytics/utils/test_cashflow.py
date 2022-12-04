@@ -1,8 +1,9 @@
 import unittest
 import datetime
+from datetime import ( time )
 import numpy as np
 from src.analytics.utils.cashflow import (
-    generate_cashflows,
+    generate_cashflows, 
     get_most_recent_cashflow,
     match_cashflow_to_discount_curve, 
     sum_cashflows, 
@@ -123,10 +124,22 @@ class GenerateCashflowTestCase(unittest.TestCase):
     def test_generate_monthly_fixed_cashflows(self):
 
         coupon_rate_periodic = 0.05/12
+        ex_record_config = {
+            "record_date": {
+                "days_before_payment_date": 8,
+                "record_time": 19,
+                "day_type": "calendar",
+                "time_of_record": time(hour=19)
+            }
+        }
 
         expected = [
             {
-                'date': "2000-02-01",
+                'date': {
+                    "payment_date": "2000-02-01",
+                    "record_date": "2000-01-24",
+                    "ex_date": "2000-01-23"
+                },
                 'cashflow': {
                     'total': coupon_rate_periodic * 100,
                     'coupon_interest': {
@@ -142,7 +155,11 @@ class GenerateCashflowTestCase(unittest.TestCase):
                 }
             },
             {
-                'date': "2000-03-01",
+                'date': {
+                    "payment_date": "2000-03-01",
+                    "record_date": "2000-02-22",
+                    "ex_date": "2000-02-21"
+                },
                 'cashflow': {
                     'total': coupon_rate_periodic * 100,
                     'coupon_interest': {
@@ -158,7 +175,11 @@ class GenerateCashflowTestCase(unittest.TestCase):
                 }
             },
             {
-                'date': "2000-04-01",
+                'date': {
+                    "payment_date": "2000-04-01",
+                    "record_date": "2000-03-24",
+                    "ex_date": "2000-03-23"
+                },
                 'cashflow': {
                     'total': coupon_rate_periodic * 100,
                     'coupon_interest': {
@@ -174,7 +195,11 @@ class GenerateCashflowTestCase(unittest.TestCase):
                 }
             },
             {
-                'date': "2000-05-01",
+                'date': {
+                    "payment_date": "2000-05-01",
+                    "record_date": "2000-04-23",
+                    "ex_date": "2000-04-22"
+                },
                 'cashflow': {
                     'total': coupon_rate_periodic * 100,
                     'coupon_interest': {
@@ -190,7 +215,11 @@ class GenerateCashflowTestCase(unittest.TestCase):
                 }
             },
             {
-                'date': "2000-06-01",
+                'date': {
+                    "payment_date": "2000-06-01",
+                    "record_date": "2000-05-24",
+                    "ex_date": "2000-05-23"
+                },
                 'cashflow': {
                     'total': coupon_rate_periodic * 100,
                     'coupon_interest': {
@@ -206,7 +235,11 @@ class GenerateCashflowTestCase(unittest.TestCase):
                 }
             },
             {
-                'date': "2000-07-01",
+                'date': {
+                    "payment_date": "2000-07-01",
+                    "record_date": "2000-06-23",
+                    "ex_date": "2000-06-22"
+                },
                 'cashflow': {
                     'total': coupon_rate_periodic * 100,
                     'coupon_interest': {
@@ -222,7 +255,11 @@ class GenerateCashflowTestCase(unittest.TestCase):
                 }
             },
             {
-                'date': "2000-08-01",
+                'date': {
+                    "payment_date": "2000-08-01",
+                    "record_date": "2000-07-24",
+                    "ex_date": "2000-07-23"
+                },
                 'cashflow': {
                     'total': coupon_rate_periodic * 100,
                     'coupon_interest': {
@@ -238,7 +275,11 @@ class GenerateCashflowTestCase(unittest.TestCase):
                 }
             },
             {
-                'date': "2000-09-01",
+                'date': {
+                    "payment_date": "2000-09-01",
+                    "record_date": "2000-08-24",
+                    "ex_date": "2000-08-23"
+                },
                 'cashflow': {
                     'total': coupon_rate_periodic * 100,
                     'coupon_interest': {
@@ -254,7 +295,11 @@ class GenerateCashflowTestCase(unittest.TestCase):
                 }
             },
             {
-                'date': "2000-10-01",
+                'date': {
+                    "payment_date": "2000-10-01",
+                    "record_date": "2000-09-23",
+                    "ex_date": "2000-09-22"
+                },
                 'cashflow': {
                     'total': coupon_rate_periodic * 100,
                     'coupon_interest': {
@@ -270,7 +315,11 @@ class GenerateCashflowTestCase(unittest.TestCase):
                 }
             },
             {
-                'date': "2000-11-01",
+                'date': {
+                    "payment_date": "2000-11-01",
+                    "record_date": "2000-10-24",
+                    "ex_date": "2000-10-23"
+                },
                 'cashflow': {
                     'total': coupon_rate_periodic * 100,
                     'coupon_interest': {
@@ -286,7 +335,11 @@ class GenerateCashflowTestCase(unittest.TestCase):
                 }
             },
             {
-                'date': "2000-12-01",
+                'date': {
+                    "payment_date": "2000-12-01",
+                    "record_date": "2000-11-23",
+                    "ex_date": "2000-11-22"
+                },
                 'cashflow': {
                     'total': coupon_rate_periodic * 100 + 100,
                     'coupon_interest': {
@@ -308,7 +361,8 @@ class GenerateCashflowTestCase(unittest.TestCase):
             end_date = datetime.datetime.strptime("2000-12-01", "%Y-%m-%d"),
             cashflow_freq = "M",
             face_value = 100.00,
-            coupon_rate_or_margin= 0.05
+            coupon_rate_or_margin= 0.05,
+            ex_record_config=ex_record_config
         )
 
         self.assertEqual(result, expected)
@@ -316,10 +370,23 @@ class GenerateCashflowTestCase(unittest.TestCase):
     def test_generate_annual_fixed_cashflows(self):
         
         coupon_rate_periodic = 0.05/1
+        
+        ex_record_config = {
+            "record_date": {
+                "days_before_payment_date": 8,
+                "record_time": 19,
+                "day_type": "calendar",
+                "time_of_record": time(hour=19)
+            }
+        }
 
         expected = [
             {
-                'date': "2001-01-01",
+                'date': {
+                    "payment_date": "2001-01-01",
+                    "record_date": "2000-12-24",
+                    "ex_date": "2000-12-23"
+                },
                 'cashflow': {
                     'total': coupon_rate_periodic * 100 + 100,
                     'coupon_interest': {
@@ -341,7 +408,8 @@ class GenerateCashflowTestCase(unittest.TestCase):
             end_date = datetime.datetime.strptime("2001-01-01", "%Y-%m-%d"),
             cashflow_freq = "A",
             face_value = 100.00,
-            coupon_rate_or_margin= 0.05
+            coupon_rate_or_margin= 0.05,
+            ex_record_config=ex_record_config
         )
 
         self.assertEqual(result, expected)
@@ -349,10 +417,23 @@ class GenerateCashflowTestCase(unittest.TestCase):
     def test_generate_annual_floating_cashflows(self):
         
         coupon_margin_periodic = 0.03/1
+        
+        ex_record_config = {
+            "record_date": {
+                "days_before_payment_date": 8,
+                "record_time": 19,
+                "day_type": "calendar",
+                "time_of_record": time(hour=19)
+            }
+        }
 
         expected = [
             {
-                'date': "2001-01-01",
+                'date': {
+                    "payment_date": "2001-01-01",
+                    "record_date": "2000-12-24",
+                    "ex_date": "2000-12-23"
+                },
                 'cashflow': {
                     'total': round((coupon_margin_periodic * 100) + 100 + MOCK_NSS_CURVE_RESULT[0], 4),
                     'coupon_interest': {
@@ -398,7 +479,8 @@ class GenerateCashflowTestCase(unittest.TestCase):
                 nss_params[4],
                 nss_params[5]
             ),
-            pricing_date=datetime.datetime.strptime("2000-01-01", "%Y-%m-%d")
+            pricing_date=datetime.datetime.strptime("2000-01-01", "%Y-%m-%d"),
+            ex_record_config=ex_record_config
         )
         result_dates = [dictionary['date'] for dictionary in result]
         result_total_cashflows = [round(dictionary['cashflow']['total'], 4) for dictionary in result]
@@ -421,10 +503,22 @@ class GenerateCashflowTestCase(unittest.TestCase):
     def test_generate_annual_floating_cashflows_2Y(self):
         
         coupon_margin_periodic = 0.03/1
+        ex_record_config = {
+            "record_date": {
+                "days_before_payment_date": 8,
+                "record_time": 19,
+                "day_type": "calendar",
+                "time_of_record": time(hour=19)
+            }
+        }
 
         expected = [
             {
-                'date': "2001-01-01",
+                'date': {
+                    "payment_date": "2001-01-01",
+                    "record_date": "2000-12-24",
+                    "ex_date": "2000-12-23"
+                },
                 'cashflow': {
                     'total': round((coupon_margin_periodic * 100) + MOCK_NSS_CURVE_RESULT[0], 4),
                     'coupon_interest': {
@@ -440,7 +534,11 @@ class GenerateCashflowTestCase(unittest.TestCase):
                 },
             },
             {
-                'date': "2002-01-01",
+                'date': {
+                    "payment_date": "2002-01-01",
+                    "record_date": "2001-12-24",
+                    "ex_date": "2001-12-23"
+                },
                 'cashflow': round((coupon_margin_periodic * 100) + 100 + MOCK_NSS_CURVE_RESULT[1], 4),
                 'cashflow': {
                     'total': round((coupon_margin_periodic * 100) + 100 + MOCK_NSS_CURVE_RESULT[1], 4),
@@ -487,7 +585,8 @@ class GenerateCashflowTestCase(unittest.TestCase):
                 nss_params[4],
                 nss_params[5]
             ),
-            pricing_date=datetime.datetime.strptime("2000-01-01", "%Y-%m-%d")
+            pricing_date=datetime.datetime.strptime("2000-01-01", "%Y-%m-%d"),
+            ex_record_config=ex_record_config
         )
         result_dates = [dictionary['date'] for dictionary in result]
         result_total_cashflows = [round(dictionary['cashflow']['total'], 4) for dictionary in result]

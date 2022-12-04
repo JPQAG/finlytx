@@ -2,16 +2,13 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from typing import Dict, List
 
-from src.analytics.utils.date_time import generate_date_range, years_between_dates
+from src.analytics.utils.date_time import generate_date_range, years_between_dates, get_record_date
 from src.analytics.utils.lookup import (
     TIMESERIES_TIME_PERIODS,
     CURVE_OPTIONS,
     CURVE_OPTIONS_OBJECTS
 )
 from src.analytics.utils.regression.ns import NelsonSiegelCurve
-
-def generate_cashflows() -> None:
-    pass
 
 def match_cashflow_to_discount_curve(
     cashflows: List[Dict],
@@ -94,7 +91,8 @@ def generate_cashflows(
     variable_coupon: bool=False,
     underlying_curve: CURVE_OPTIONS_OBJECTS = NelsonSiegelCurve(0,0,0,0),
     redemption_discount: float=0.00,
-    pricing_date=datetime.datetime.today()
+    pricing_date=datetime.datetime.today(),
+    ex_record_config: Dict={}
 ) -> List[Dict]:
     """Generates cashflows from a start_date to end_date. 
 
@@ -128,6 +126,8 @@ def generate_cashflows(
 
     for date in date_range:
         date_formatted = datetime.datetime.strptime(date, "%Y-%m-%d")
+        record_date = get_record_date(date_formatted, ex_record_config)
+        ex_date = (record_date - datetime.timedelta(days=1))
         
         principal_component = face_value * (1 + redemption_discount) if date == date_range[-1] else 0
         amortising_component = 0
@@ -143,7 +143,11 @@ def generate_cashflows(
         
         cashflows_array.append(
             {
-                'date': date,
+                'date': {
+                    "payment_date": date,
+                    "record_date": record_date.strftime("%Y-%m-%d"),
+                    "ex_date": ex_date.strftime("%Y-%m-%d")
+                },
                 'cashflow': {
                     'total': total_cashflow,
                     'coupon_interest': {

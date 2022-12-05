@@ -1,5 +1,6 @@
 import datetime
 from typing import Any, Dict, List
+import pandas as pd
 
 from src.analytics.utils.date_time import(
     days_between_dates,
@@ -76,7 +77,7 @@ def get_pricing_history(
                 previous_cashflow_payment_date = security_cashflow_input[i-1]['date']['payment_date']
                 cashflow_start = _default_date(previous_cashflow_payment_date)
             
-            cashflow_end = _default_date(security_cashflow_input[i]['date']['payment_date'])
+            cashflow_end = _default_date(security_cashflow_input[i]['date']['payment_date']) - datetime.timedelta(days=1)
             
             if cashflow_start <= price_date <= cashflow_end:
                 relevant_cashflow = security_cashflow_input[i]
@@ -96,7 +97,7 @@ def get_pricing_history(
         
         pricing_history.append(
                 {
-                "date": price_date,
+                "date": pd.to_datetime(price_date).strftime("%Y-%m-%d"),
                 "clean_price": price_value,
                 "accrued_interest": accrued_interest,
                 "dirty_price": price_value + accrued_interest
@@ -104,6 +105,46 @@ def get_pricing_history(
         )
         
     return pricing_history
-        
+
+def get_period_total_return(
+    start_date: datetime.datetime,
+    end_date: datetime.datetime,
+    price_history: List[Dict],
+    security_cashflows: List[Dict]
+) -> float:
+    assert all([isinstance(date, datetime.datetime) for date in [start_date, end_date]]), f"{start_date} and {end_date} must be of type datetime."
+
+    cashflows_paid = [
+        cashflow for cashflow
+        in security_cashflows
+        if start_date <= _default_date(cashflow['date']['record_date']) <= end_date
+    ]
+    cashflow_payment_sum = sum(cashflow['cashflow']['total'] for cashflow in cashflows_paid)
+    
+    relevant_price_dates = [
+        price_dict for price_dict
+        in price_history
+        if start_date.date() <= _default_date(price_dict['date']).date() <= end_date.date()
+    ]
+    
+    assert len(relevant_price_dates) > 1, "price_history must be greater than a single day."
+    start_date_price_dict = relevant_price_dates[0]
+    end_date_price_dict = relevant_price_dates[-1]
+    
+    price_return = (end_date_price_dict['price'] - start_date_price_dict['price']) / start_date_price_dict['price']
+    cashflow_return = cashflow_payment_sum / start_date_price_dict['price']
+    total_return = price_return + cashflow_return
+    
+    return_profile = {
+        'return': {
+            'price_return': price_return,
+            'cashflow_return': cashflow_return,
+            'total_return': total_return
+        },
+        'cashflows_paid': cashflows_paid,
+        'relevant_price_dates': relevant_price_dates        
+    }
+    
+    return return_profile
         
         

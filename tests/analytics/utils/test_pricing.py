@@ -14,7 +14,8 @@ from src.analytics.utils.date_time import (
 from src.analytics.utils.pricing import (
     get_negative_accrued_interest,
     get_accrued_interest,
-    get_pricing_history
+    get_pricing_history,
+    get_period_total_return
 )
 
 class AccruedInterestTestCase(unittest.TestCase):
@@ -125,9 +126,7 @@ class AccruedInterestTestCase(unittest.TestCase):
 class PriceHistoryTestCase(unittest.TestCase):
 
     def test_get_pricing_history(self):
-        
-        coupon_rate_periodic = 5/12/100
-        
+                
         issue_date = "2000-01-01"
 
         date_range = pd.bdate_range(issue_date, '2000-12-25')
@@ -149,7 +148,10 @@ class PriceHistoryTestCase(unittest.TestCase):
             in date_range
         ]
         
-        expected = []
+        end_first_period = {'date': '2000-01-31', 'clean_price': 100, 'accrued_interest': -0.013440860215053765, 'dirty_price': 99.98655913978494}
+        start_second_period = {'date': '2000-02-01', 'clean_price': 100, 'accrued_interest': 0.0, 'dirty_price': 100.0}
+        expected_first = {'date': '2000-01-03', 'clean_price': 100, 'accrued_interest': 0.02777777777777778, 'dirty_price': 100.02777777777777}
+        expected_last = {'date': '2000-12-25', 'clean_price': 100, 'accrued_interest': -0.09408602150537634, 'dirty_price': 99.90591397849462}
         
         result = get_pricing_history(
             issue_date,
@@ -157,8 +159,58 @@ class PriceHistoryTestCase(unittest.TestCase):
             cashflow_input
         )
         
-        self.assertEqual(expected, result)
+        self.assertEqual(expected_first, result[0])
+        self.assertEqual(end_first_period, result[20])
+        self.assertEqual(start_second_period, result[21])
+        self.assertEqual(expected_last, result[-1])
         
+class HistoricalReturnsTestCase(unittest.TestCase):
+    
+    def test_security_return_price_component(self):
         
+        issue_date = "2000-01-01"
         
+        start_date = "2000-01-15"
+        end_date = "2000-03-15"
+        
+        start_price = 100.00
+        end_price = 110.00
+    
+        annual_coupon = 0.05
+        frequency = 12
+        face_value = 100
+        number_of_coupons_paid = 2
+            
+        price_history_input = [
+            {
+                'date': "2000-01-15",
+                'price': 100.00
+            },
+            {
+                'date': "2000-03-15",
+                'price': 110.00
+            }
+        ]
+        
+        cashflow_input = generate_cashflows(
+            start_date=_default_date(issue_date),
+            end_date=_default_date("2001-01-01"),
+            cashflow_freq="M",
+            face_value=100.00,
+            coupon_rate_or_margin=0.05
+        )
+        
+        result = get_period_total_return(
+            start_date=_default_date(start_date),
+            end_date=_default_date(end_date),
+            price_history=price_history_input,
+            security_cashflows=cashflow_input
+        )
+        
+        expected_return = (
+            (annual_coupon/frequency * face_value * number_of_coupons_paid) 
+            + (end_price - start_price)
+        ) / start_price
+        
+        self.assertEqual(expected_return, result['return']['total_return'])
         

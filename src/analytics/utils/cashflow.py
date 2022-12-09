@@ -85,7 +85,7 @@ def trim_cashflows_after_workout(
 def generate_cashflows(
     start_date: datetime.datetime,
     end_date: datetime.datetime,
-    cashflow_freq: float,
+    cashflow_freq: str,
     face_value: float,
     coupon_rate_or_margin: float,
     arrears: bool=True,

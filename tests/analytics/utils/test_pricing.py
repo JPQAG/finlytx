@@ -15,7 +15,8 @@ from src.analytics.utils.pricing import (
     get_negative_accrued_interest,
     get_accrued_interest,
     get_pricing_history,
-    get_period_total_return
+    get_period_total_return,
+    get_annualised_return
 )
 
 class AccruedInterestTestCase(unittest.TestCase):
@@ -166,7 +167,7 @@ class PriceHistoryTestCase(unittest.TestCase):
         
 class HistoricalReturnsTestCase(unittest.TestCase):
     
-    def test_security_return_price_component(self):
+    def test_security_return(self):
         
         issue_date = "2000-01-01"
         
@@ -213,4 +214,23 @@ class HistoricalReturnsTestCase(unittest.TestCase):
         ) / start_price
         
         self.assertEqual(expected_return, result['return']['total_return'])
+        self.assertEqual(0.05/12*2, result['return']['cashflow_return'])
+        self.assertEqual(0.10, result['return']['price_return'])
+
+    def test_annualise_total_return(self):
         
+        days_in_year = 365
+        start_date = _default_date("2000-01-15")
+        end_date = _default_date("2001-10-26")
+        cumulative_return = 0.1575
+        
+        expected_annualised_return = 0.08560
+        
+        result = get_annualised_return(
+            start_date=start_date,
+            end_date=end_date,
+            cumulative_return=cumulative_return,
+            days_in_year=days_in_year
+        )
+        
+        self.assertEqual(expected_annualised_return, round(result,5))

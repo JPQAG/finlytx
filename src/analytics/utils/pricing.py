@@ -146,5 +146,18 @@ def get_period_total_return(
     }
     
     return return_profile
+
+def get_annualised_return(
+    start_date: datetime.datetime,
+    end_date: datetime.datetime,
+    cumulative_return: List[Dict],
+    days_in_year: float=365
+) -> float:
+    number_of_days_held = days_between_dates(start_date, end_date)
+    
+    annualised_return = (((1+cumulative_return)**(days_in_year/number_of_days_held)) - 1)
+    
+    return annualised_return
+    
         
         

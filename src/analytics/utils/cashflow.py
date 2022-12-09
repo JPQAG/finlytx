@@ -1,4 +1,5 @@
 import datetime
+from datetime import time
 from dateutil.relativedelta import relativedelta
 from typing import Dict, List
 
@@ -84,7 +85,7 @@ def trim_cashflows_after_workout(
 def generate_cashflows(
     start_date: datetime.datetime,
     end_date: datetime.datetime,
-    cashflow_freq: float,
+    cashflow_freq: str,
     face_value: float,
     coupon_rate_or_margin: float,
     arrears: bool=True,
@@ -92,9 +93,18 @@ def generate_cashflows(
     underlying_curve: CURVE_OPTIONS_OBJECTS = NelsonSiegelCurve(0,0,0,0),
     redemption_discount: float=0.00,
     pricing_date=datetime.datetime.today(),
-    ex_record_config: Dict={}
+    ex_record_config: Dict={
+        "record_date": {
+            "days_before_payment_date": 8,
+            "record_time": 19,
+            "day_type": "calendar",
+            "time_of_record": time(hour=19)
+        }
+    }
 ) -> List[Dict]:
     """Generates cashflows from a start_date to end_date. 
+    
+    If in arrears then start_date is not included in the returned cashflows.
 
     *The end_date specifies the final cashflow date. Thus the start of subsequent periods is the day after the cashflow date (in arrears).
     

@@ -105,7 +105,5 @@ class SecurityRiskTestCase(unittest.TestCase):
       
       self.assertEqual(round(modified_duration_result, 1), 12.3)
 
-      
-      
-      
+
 

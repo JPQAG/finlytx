@@ -141,3 +141,4 @@ def calculate_modified_duration(
     periods_per_year: float = 1
 ) -> float:
     return (macaulay_duration / (1 + yield_per_period)) / periods_per_year
+

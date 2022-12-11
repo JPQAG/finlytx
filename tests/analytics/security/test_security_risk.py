@@ -4,13 +4,15 @@ import datetime
 
 from src.analytics.security.security_risk import (
    calculate_macaulay_duration,
-   calculate_modified_duration
+   calculate_modified_duration,
+   calculate_stdev,
+   calculate_security_volatility_stdev
 )
 from src.analytics.utils.cashflow import (
     generate_cashflows
 )
 
-class SecurityRiskTestCase(unittest.TestCase):
+class SecurityDurationRiskTestCase(unittest.TestCase):
 
    def test_calculate_macaulay_duration_fixed_annual(self):      
       # 10-Year | 8% annual coupon bond | yield 10.40% | price 85.503075
@@ -105,5 +107,42 @@ class SecurityRiskTestCase(unittest.TestCase):
       
       self.assertEqual(round(modified_duration_result, 1), 12.3)
 
+class securityVolatilityRiskTestCase(unittest.TestCase):
+   
+   def test_calculate_stdev(self):
+      
+      data = [7.00,5.00,4.00,9.00,12.00,45.00]
+      
+      expected = 15.616
+      
+      result = calculate_stdev(data)
+      
+      self.assertEqual(round(result,3), expected)
+   
+   def test_security_volatility(self):
+      
+      security_return = [
+         {
+               'start_date_close': '2000-01-01',
+               'end_date_close': '2000-01-02',
+               'period_return': 0.01
+         },
+         {
+               'start_date_close': '2000-01-02',
+               'end_date_close': '2000-01-03',
+               'period_return': -0.0099
+         },
+         {
+               'start_date_close': '2000-01-03',
+               'end_date_close': '2000-01-04',
+               'period_return': 0.02
+         }
+      ]
+      
+      expected = 0.01522
+      
+      result = calculate_security_volatility_stdev(security_return)
+      
+      self.assertEqual(round(result, 5), expected)
 
 

@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from typing import Dict, List
+import statistics
+
 from src.analytics.utils.cashflow import get_most_recent_cashflow
 from src.analytics.utils.date_time import (
     _default_date
@@ -142,3 +144,20 @@ def calculate_modified_duration(
 ) -> float:
     return (macaulay_duration / (1 + yield_per_period)) / periods_per_year
 
+def calculate_stdev(
+    value_list: List
+) -> float:
+    assert len(value_list) > 0, "Value list input cannot be empty"
+    assert all(isinstance(value, float) for value in value_list), "All values in list must be of float type"
+    
+    return statistics.stdev(value_list)
+
+def calculate_security_volatility_stdev(
+    return_history: List[Dict]
+) -> float:
+    assert len(return_history) > 0, "Value list input cannot be empty"
+    assert all(isinstance(value, Dict) for value in return_history), "All values in list must be dictionaries."
+    
+    return_only = [dictionary['period_return'] for dictionary in return_history]
+    
+    return calculate_stdev(return_only)

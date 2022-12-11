@@ -72,3 +72,5 @@ TODO: Floating cashflows.
 TODO: Regression:
     1. Multiple regression types.
     2. Regression maximum error allowance. (testing).
+
+* Prices represent close on specified date unless otherwise stated.

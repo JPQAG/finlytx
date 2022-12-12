@@ -241,3 +241,46 @@ MOCK_NSS_CURVE_RESULT = [
     1.625260, 1.642502
 ]
 
+MOCK_TRADES_INDEX = [
+    {
+        "trade_date": "2000-01-01",
+        "settlement_date": "2000-01-03",
+        "isin": "XS12345678901",
+        "side": "B",
+        "volume": 100000,
+        "price": 101.50
+    },
+    {
+        "trade_date": "2000-02-01",
+        "settlement_date": "2000-02-03",
+        "isin": "XS12345678902",
+        "side": "B",
+        "volume": 100000,
+        "price": 100.50
+    },
+    {
+        "trade_date": "2000-03-31",
+        "settlement_date": "2000-04-02",
+        "isin": "XS12345678902",
+        "side": "S",
+        "volume": 50000,
+        "price": 101.50
+    },
+    {
+        "trade_date": "2000-03-31",
+        "settlement_date": "2000-04-02",
+        "isin": "XS12345678902",
+        "side": "S",
+        "volume": 50000,
+        "price": 101.50
+    },
+    {
+        "trade_date": "2000-06-30",
+        "settlement_date": "2000-07-02",
+        "isin": "XS12345678901",
+        "side": "S",
+        "volume": 50000,
+        "price": 100.50
+    }
+]
+

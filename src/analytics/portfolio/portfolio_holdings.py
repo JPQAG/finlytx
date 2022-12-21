@@ -1,5 +1,6 @@
 from typing import Dict, List
 from operator import itemgetter
+import copy
 
 def get_holdings_from_trades(
     trade_history: List[Dict]
@@ -22,7 +23,7 @@ def get_holdings_from_trades(
         
         holdings_dict[settlement_date] = {
             "date": settlement_date,
-            "holdings": holdings_count.copy()
+            "holdings": copy.deepcopy(holdings_count)
         }
         
     return holdings_dict

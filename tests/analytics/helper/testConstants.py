@@ -283,4 +283,3 @@ MOCK_TRADES_INDEX = [
         "price": 100.50
     }
 ]
-

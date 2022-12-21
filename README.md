@@ -74,3 +74,4 @@ TODO: Regression:
     2. Regression maximum error allowance. (testing).
 
 * Prices represent close on specified date unless otherwise stated.
+* Price needs to specify the 'per original face_value' value.

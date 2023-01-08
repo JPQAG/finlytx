@@ -16,9 +16,56 @@ from ..helper.testConstants import (
 )
 
 class PortfolioValuationIndexTestCase(unittest.TestCase):
+
     
-    # Wrong input types
-    # Empty holdings
+    def test_get_portfolio_valuation_index_no_holdings_at_valuation_date(self):
+        # Test the case where there are no holdings at the valuation date in the portfolio_holdings_index
+        with self.assertRaises(Exception) as context:
+            get_portfolio_valuation_index(
+                datetime.datetime(2000,1,1),
+                MOCK_TRADES_INDEX,
+                {
+                    "XS1234567890": {
+                        "date": datetime.datetime(2000,1,1),
+                        "per_original_face_value": 100,
+                        "value": 101.50
+                    }
+                }
+            )
+        self.assertEqual(context.exception.args[0], "No holdings found at valuation date.")
+
+    def test_get_portfolio_valuation_index_no_prices_at_valuation_date(self):
+        # Test the case where there are no prices for any of the securities in the price_history_index on the valuation date
+        with self.assertRaises(Exception) as context:
+            get_portfolio_valuation_index(
+                datetime.datetime(2000,1,1),
+                MOCK_TRADES_INDEX,
+                {
+                    "XS1234567890": {
+                        "date": datetime.datetime(1999,12,31),
+                        "per_original_face_value": 100,
+                        "value": 101.50
+                    }
+                }
+            )
+        self.assertEqual(context.exception.args[0], "No price data found for securities in portfolio at valuation date.")
+
+    def test_get_portfolio_valuation_index_holdings_for_untracked_security(self):
+        # Test the case where there are holdings for securities that are not present in the price_history_index on the valuation date
+        with self.assertRaises(Exception) as context:
+            get_portfolio_valuation_index(
+                datetime.datetime(2000,1,1),
+                MOCK_TRADES_INDEX,
+                {
+                    "XS1234567891": {
+                        "date": datetime.datetime(2000,1,1),
+                        "per_original_face_value": 100,
+                        "value": 101.50
+                    }
+                }
+            )
+        self.assertEqual(context.exception.args[0], "No price data found for securities in portfolio at valuation date.")
+
     
     def test_get_portfolio_valuation_index_holdings_type_incorrect(self):
         with self.assertRaises(Exception) as context:
@@ -60,115 +107,26 @@ class PortfolioValuationIndexTestCase(unittest.TestCase):
                 }
             )
         self.assertEqual(context.exception.args[0], "portfolio_holdings_index input must not be empty.")
+            
+    def test_get_portfolio_valuation_index(self):
         
-    #     
-    
-    def test_get_portfolio_valuation(self):
-        
-        portfolio_holdings = get_holdings_from_trades(MOCK_TRADES_INDEX)
-        
-        price_history_index = {
-            "XS12345678901": {
-                "2000-01-01": {
-                    "source": "mock_source",
-                    "clean_price": 100.00,
-                    "accrued_interest": 1.50,
-                    "dirty_price": 101.50
-                },
-                "2000-02-01": {
-                    "source": "mock_source",
-                    "clean_price": 100.00,
-                    "accrued_interest": 1.50,
-                    "dirty_price": 101.50
-                },
-                "2000-03-31": {
-                    "source": "mock_source",
-                    "clean_price": 100.00,
-                    "accrued_interest": 1.50,
-                    "dirty_price": 101.50
-                },
-                "2000-06-30": {
-                    "source": "mock_source",
-                    "clean_price": 100.00,
-                    "accrued_interest": 1.50,
-                    "dirty_price": 101.50
-                },
-            },
-            "XS12345678902": {
-                "2000-01-01": {
-                    "source": "mock_source",
-                    "clean_price": 100.00,
-                    "accrued_interest": 0.50,
-                    "dirty_price": 101.50
-                },
-                "2000-02-01": {
-                    "source": "mock_source",
-                    "clean_price": 100.00,
-                    "accrued_interest": 0.50,
-                    "dirty_price": 101.50
-                },
-                "2000-03-31": {
-                    "source": "mock_source",
-                    "clean_price": 100.00,
-                    "accrued_interest": 0.50,
-                    "dirty_price": 101.50
-                },
-                "2000-06-30": {
-                    "source": "mock_source",
-                    "clean_price": 100.00,
-                    "accrued_interest": 0.50,
-                    "dirty_price": 101.50
-                }
-            }            
-        }
-                
-        expected = {
+        portfolio_holdings = {
             "2000-01-03" : {
                 "date": "2000-01-03",
-                "valuation": {
-                    "total_volume": 100000,
-                    "clean_valuation": 100000,
-                    "accrued_interest": 1500,
-                    "total_valuation": 101500
-                },
                 "holdings": {
                     "XS12345678901": {
-                        "clean_price": 100.000,
-                        "accrued_interest": 1.500,
-                        "dirty_price": 101.500,
-                        "volume": 100000,
-                        "clean_valuation": 100000,
-                        "accrued_interest": 1500,
-                        "total_valuation": 101500
+                        "volume": 100000
                     }
                 }
             },
             "2000-02-03" : {
                 "date": "2000-02-03",
-                "valuation": {
-                    "total_volume": 200000,
-                    "clean_valuation": 200000,
-                    "accrued_interest": 3000,
-                    "total_valuation": 203000
-                },
                 "holdings": {
                     "XS12345678901": {
-                        "clean_price": 100.000,
-                        "accrued_interest": 1.500,
-                        "dirty_price": 101.500,
-                        "volume": 100000,
-                        "clean_valuation": 100000,
-                        "accrued_interest": 1500,
-                        "total_valuation": 101500
+                        "volume": 100000
                     },
                     "XS12345678902": {
-                        "clean_price": 100.000,
-                        "accrued_interest": 1.500,
-                        "dirty_price": 101.500,
-                        "volume": 100000,
-                        "clean_valuation": 100000,
-                        "accrued_interest": 1500,
-                        "total_valuation": 101500
+                        "volume": 100000
                     }
                 }
             },
@@ -176,22 +134,10 @@ class PortfolioValuationIndexTestCase(unittest.TestCase):
                 "date": "2000-04-02",
                 "holdings": {
                     "XS12345678901": {
-                        "clean_price": 100.000,
-                        "accrued_interest": 1.500,
-                        "dirty_price": 101.500,
-                        "volume": 100000,
-                        "clean_valuation": 100000,
-                        "accrued_interest": 1500,
-                        "total_valuation": 101500
+                        "volume": 100000
                     },
                     "XS12345678902": {
-                        "clean_price": 100.000,
-                        "accrued_interest": 1.500,
-                        "dirty_price": 101.500,
-                        "volume": 0,
-                        "clean_valuation": 0,
-                        "accrued_interest": 0,
-                        "total_valuation": 0
+                        "volume": 0
                     }
                 }
             },
@@ -199,32 +145,213 @@ class PortfolioValuationIndexTestCase(unittest.TestCase):
                 "date": "2000-07-02",
                 "holdings": {
                     "XS12345678901": {
-                        "clean_price": 100.000,
-                        "accrued_interest": 1.500,
-                        "dirty_price": 101.500,
-                        "volume": 50000,
-                        "clean_valuation": 50000,
-                        "accrued_interest": 750,
-                        "total_valuation": 50750
+                        "volume": 50000
                     },
                     "XS12345678902": {
-                        "clean_price": 100.000,
-                        "accrued_interest": 1.500,
-                        "dirty_price": 101.500,
-                        "volume": 0,
-                        "clean_valuation": 0,
-                        "accrued_interest": 0,
-                        "total_valuation": 0
+                        "volume": 0
                     }
                 }
             }
         }
         
-        result = get_portfolio_valuation(
-            
-        )
+        price_history_index = {
+            "XS1234567890": {
+                "2000-01-01": {
+                    "date": datetime.datetime(2000,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 100.50
+                },
+                "2000-02-01": {
+                    "date": datetime.datetime(2000,2,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 101.50
+                },
+                "2000-03-31": {
+                    "date": datetime.datetime(2000,3,31),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 102.50
+                },
+                "2000-06-30": {
+                    "date": datetime.datetime(2000,6,30),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 103.50
+                }
+            },
+            "XS1234567891": {
+                "2000-01-01": {
+                    "date": datetime.datetime(2000,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 103.50
+                },
+                "2000-02-01": {
+                    "date": datetime.datetime(2000,2,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 102.50
+                },
+                "2000-03-31": {
+                    "date": datetime.datetime(2000,3,31),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 101.50
+                },
+                "2000-06-30": {
+                    "date": datetime.datetime(2000,6,30),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 100.50
+                },
+            }            
+        }
+                
+        expected = {
+            "2000-01-03" : {
+                "date": datetime.datetime(2000,1,3),
+                "valuation": {
+                    "total_valuation": {
+                        "AUD": 100500
+                    },
+                    "position_valuation": {
+                        "XS12345678901": {
+                            "currency": "AUD",
+                            "volume": 100000,
+                            "price": {
+                                "date": datetime.datetime(2000,1,1),
+                                "per_original_face_value": 100,
+                                "currency": "AUD",
+                                "base_currency_conversion_rate": 1.00,
+                                "value": 100.50
+                            },
+                            "valuation": 100500.00
+                        }
+                    }
+                }
+            },
+            "2000-02-03" : {
+                "date": datetime.datetime(2000,2,3),
+                "valuation": {
+                    "total_valuation": {
+                        "AUD": 204000,
+                    },
+                    "position_valuation": {
+                        "XS1234567890": {
+                            "currency": "AUD",
+                            "volume": 100000,
+                            "price": {
+                                "date": datetime.datetime(2000,2,1),
+                                "per_original_face_value": 100,
+                                "currency": "AUD",
+                                "base_currency_conversion_rate": 1.00,
+                                "value": 101.50
+                            },
+                            "valuation": 101500.00
+                        },
+                        "XS1234567891": {
+                            "currency": "AUD",
+                            "volume": 100000,
+                            "price": {
+                                "date": datetime.datetime(2000,2,1),
+                                "per_original_face_value": 100,
+                                "currency": "AUD",
+                                "base_currency_conversion_rate": 1.0,
+                                "value": 102.500
+                            },
+                            "valuation": 102500
+                        }
+                    }
+                }
+            },
+            "2000-04-02" : {
+                "date": datetime.datetime(2000,4,2),
+                "valuation": {
+                    "total_valuation": {
+                        "AUD": 102500,
+                    },
+                    "position_valuation": {
+                        "XS1234567890": {
+                            "currency": "AUD",
+                            "volume": 100000,
+                            "price": {
+                                "date": datetime.datetime(2000,3,31),
+                                "per_original_face_value": 100,
+                                "currency": "AUD",
+                                "base_currency_conversion_rate": 1.00,
+                                "value": 102.50
+                            },
+                            "valuation": 102500.00
+                        },
+                        "XS1234567891": {
+                            "currency": "AUD",
+                            "volume": 0,
+                            "price": {
+                                "date": datetime.datetime(2000,3,31),
+                                "per_original_face_value": 100,
+                                "currency": "AUD",
+                                "base_currency_conversion_rate": 1.0,
+                                "value": 101.500
+                            },
+                            "valuation": 0
+                        }
+                    }
+                }
+            },
+            "2000-07-02" : {
+                "date": datetime.datetime(2000,7,2),
+                "valuation": {
+                    "total_valuation": {
+                        "AUD": 102500,
+                    },
+                    "position_valuation": {
+                        "XS1234567890": {
+                            "currency": "AUD",
+                            "volume": 50000,
+                            "price": {
+                                "date": datetime.datetime(2000,6,30),
+                                "per_original_face_value": 100,
+                                "currency": "AUD",
+                                "base_currency_conversion_rate": 1.00,
+                                "value": 103.50
+                            },
+                            "valuation": 102500.00
+                        },
+                        "XS1234567891": {
+                            "currency": "AUD",
+                            "volume": 0,
+                            "price": {
+                                "date": datetime.datetime(2000,6,30),
+                                "per_original_face_value": 100,
+                                "currency": "AUD",
+                                "base_currency_conversion_rate": 1.0,
+                                "value": 100.500
+                            },
+                            "valuation": 0
+                        }
+                    }
+                }
+            }
+        }
         
-        self.assertEqual(expected, )
+        self.assertEqual(
+            get_portfolio_valuation_index(
+                datetime.datetime(2000,10,1),
+                portfolio_holdings,
+                price_history_index
+            ), 
+            expected
+        )
         
 class PortfolioValuationTestCase(unittest.TestCase):
     

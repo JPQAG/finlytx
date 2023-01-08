@@ -84,7 +84,6 @@ def calculate_macaulay_duration(
 ) -> float:
     assert len(cashflows) > 1, "Error: cashflows list must contain at least two elements."
     assert yield_to_final > 0, "Error: yield to final must be greater than zero."
-    assert all(payment_date > previous_payment_date for payment_date, previous_payment_date in zip(cashflows[1:], cashflows)), "Error: payment dates must be sequential."
     
     simple_cashflows = [
         {'date': _default_date(cashflow['date']['payment_date']), 'cashflow': cashflow['cashflow']['total']}

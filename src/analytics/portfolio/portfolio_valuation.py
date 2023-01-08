@@ -5,18 +5,56 @@ from src.analytics.utils.date_time import (
     _default_date
 )
 
+from typing import Dict
+import datetime
+
 def get_portfolio_valuation_index(
     pricing_date: datetime.datetime,
     portfolio_holdings_index: Dict,
     price_history_index: Dict        
 ) -> Dict:
-    assert isinstance(portfolio_holdings_index, Dict), "portfolio_holdings_index input must be of type dict."
-    assert isinstance(price_history_index, Dict), "price_history_index input must be of type dict."
-    assert portfolio_holdings_index, "portfolio_holdings_index input must not be empty."
+    # Check if portfolio_holdings_index is a dictionary
+    if not isinstance(portfolio_holdings_index, Dict):
+        raise Exception("portfolio_holdings_index input must be of type dict.")
+        
+    # Check if price_history_index is a dictionary
+    if not isinstance(price_history_index, Dict):
+        raise Exception("price_history_index input must be of type dict.")
     
+    # Initialize empty portfolio_valuation_index
+    portfolio_valuation_index = {}
     
+    # Iterate over dates in portfolio_holdings_index
+    for date, holdings in portfolio_holdings_index.items():
+        # Convert date to datetime
+        date = datetime.datetime.strptime(date, '%Y-%m-%d')
+        
+        # Check if date is before valuation date
+        if date < pricing_date:
+            # Initialize empty valuation for this date
+            valuation = 0
+            
+            # Iterate over securities in holdings
+            for security, data in holdings['holdings'].items():
+                # Check if security is present in price_history_index
+                if security not in price_history_index:
+                    raise Exception("No price data found for securities in portfolio at valuation date.")
+                
+                # Check if there is a price for the security on the valuation date
+                if pricing_date.strftime('%Y-%m-%d') not in price_history_index[security]:
+                    raise Exception("No price data found for securities in portfolio at valuation date.")
+                
+                # Calculate valuation for this security
+                security_valuation = get_position_valuation(security, data, price_history_index)
+                
+                # Add valuation for this security to total valuation
+                valuation += security_valuation
+            
+            # Add valuation for this date to portfolio_valuation_index
+            portfolio_valuation_index[date.strftime('%Y-%m-%d')] = valuation
     
-    return 0
+    return portfolio_valuation_index
+
 
 def get_portfolio_valuation(
     pricing_date: datetime.datetime,

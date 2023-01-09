@@ -1,158 +1,20 @@
 import datetime
 import unittest
 
-from src.analytics.portfolio.portfolio_holdings import (
-    get_holdings_from_trades
-)
-
 from src.analytics.portfolio.portfolio_valuation import (
     get_portfolio_valuation_index,
     get_position_valuation,
-    get_portfolio_valuation
+    get_portfolio_valuation,
+    _get_prices_on_date
 )
 
 from ..helper.testConstants import (
     MOCK_TRADES_INDEX
 )
 
-class PortfolioValuationIndexTestCase(unittest.TestCase):
-
+class FilterPriceHistoryTestCase(unittest.TestCase):
     
-    def test_get_portfolio_valuation_index_no_holdings_at_valuation_date(self):
-        # Test the case where there are no holdings at the valuation date in the portfolio_holdings_index
-        with self.assertRaises(Exception) as context:
-            get_portfolio_valuation_index(
-                datetime.datetime(2000,1,1),
-                MOCK_TRADES_INDEX,
-                {
-                    "XS1234567890": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "value": 101.50
-                    }
-                }
-            )
-        self.assertEqual(context.exception.args[0], "No holdings found at valuation date.")
-
-    def test_get_portfolio_valuation_index_no_prices_at_valuation_date(self):
-        # Test the case where there are no prices for any of the securities in the price_history_index on the valuation date
-        with self.assertRaises(Exception) as context:
-            get_portfolio_valuation_index(
-                datetime.datetime(2000,1,1),
-                MOCK_TRADES_INDEX,
-                {
-                    "XS1234567890": {
-                        "date": datetime.datetime(1999,12,31),
-                        "per_original_face_value": 100,
-                        "value": 101.50
-                    }
-                }
-            )
-        self.assertEqual(context.exception.args[0], "No price data found for securities in portfolio at valuation date.")
-
-    def test_get_portfolio_valuation_index_holdings_for_untracked_security(self):
-        # Test the case where there are holdings for securities that are not present in the price_history_index on the valuation date
-        with self.assertRaises(Exception) as context:
-            get_portfolio_valuation_index(
-                datetime.datetime(2000,1,1),
-                MOCK_TRADES_INDEX,
-                {
-                    "XS1234567891": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "value": 101.50
-                    }
-                }
-            )
-        self.assertEqual(context.exception.args[0], "No price data found for securities in portfolio at valuation date.")
-
-    
-    def test_get_portfolio_valuation_index_holdings_type_incorrect(self):
-        with self.assertRaises(Exception) as context:
-            get_portfolio_valuation_index(
-                datetime.datetime(2000,1,1),
-                "Not a dictionary.",
-                {
-                    "XS1234567890": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "value": 101.50
-                    }
-                }
-            )
-        self.assertEqual(context.exception.args[0], "portfolio_holdings_index input must be of type dict.")
-        
-    def test_get_portfolio_valuation_index_price_history_type_incorrect(self):
-        with self.assertRaises(Exception) as context:
-            get_portfolio_valuation_index(
-                datetime.datetime(2000,1,1),
-                {
-                    "XS1234567890": "Placeholder"
-                },
-                "Not a dictionary"
-            )
-        self.assertEqual(context.exception.args[0], "price_history_index input must be of type dict.")
-        
-    def test_get_portfolio_valuation_index_holdings_empty(self):
-        with self.assertRaises(Exception) as context:
-            get_portfolio_valuation_index(
-                datetime.datetime(2000,1,1),
-                {},
-                {
-                    "XS1234567890": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "value": 101.50
-                    }
-                }
-            )
-        self.assertEqual(context.exception.args[0], "portfolio_holdings_index input must not be empty.")
-            
-    def test_get_portfolio_valuation_index(self):
-        
-        portfolio_holdings = {
-            "2000-01-03" : {
-                "date": "2000-01-03",
-                "holdings": {
-                    "XS12345678901": {
-                        "volume": 100000
-                    }
-                }
-            },
-            "2000-02-03" : {
-                "date": "2000-02-03",
-                "holdings": {
-                    "XS12345678901": {
-                        "volume": 100000
-                    },
-                    "XS12345678902": {
-                        "volume": 100000
-                    }
-                }
-            },
-            "2000-04-02" : {
-                "date": "2000-04-02",
-                "holdings": {
-                    "XS12345678901": {
-                        "volume": 100000
-                    },
-                    "XS12345678902": {
-                        "volume": 0
-                    }
-                }
-            },
-            "2000-07-02" : {
-                "date": "2000-07-02",
-                "holdings": {
-                    "XS12345678901": {
-                        "volume": 50000
-                    },
-                    "XS12345678902": {
-                        "volume": 0
-                    }
-                }
-            }
-        }
+    def test_get_prices_on_date(self):
         
         price_history_index = {
             "XS1234567890": {
@@ -216,6 +78,176 @@ class PortfolioValuationIndexTestCase(unittest.TestCase):
                 },
             }            
         }
+        
+        expected = {
+            "XS1234567890": {
+                "date": datetime.datetime(2000,1,1),
+                "per_original_face_value": 100,
+                "currency": "AUD",
+                "base_currency_conversion_rate": 1.00,
+                "value": 100.50
+            },
+            "XS1234567891": {
+                "date": datetime.datetime(2000,1,1),
+                "per_original_face_value": 100,
+                "currency": "AUD",
+                "base_currency_conversion_rate": 1.00,
+                "value": 103.50
+            }
+        }
+        
+        result = _get_prices_on_date(datetime.datetime(2000,1,1), price_history_index)
+        
+        self.assertEqual(result,expected)
+
+class PortfolioValuationIndexTestCase(unittest.TestCase):
+    
+    def test_get_portfolio_valuation_index_holdings_type_incorrect(self):
+        with self.assertRaises(Exception) as context:
+            get_portfolio_valuation_index(
+                "Not a dictionary.",
+                {
+                    "XS1234567890": {
+                        "date": datetime.datetime(2000,1,1),
+                        "per_original_face_value": 100,
+                        "value": 101.50
+                    }
+                }
+            )
+        self.assertEqual(context.exception.args[0], "portfolio_holdings_index input must be of type dict.")
+
+    def test_get_portfolio_valuation_index_price_history_type_incorrect(self):
+        with self.assertRaises(Exception) as context:
+            get_portfolio_valuation_index(
+                {
+                    "XS1234567890": "Placeholder"
+                },
+                "Not a dictionary"
+            )
+        self.assertEqual(context.exception.args[0], "price_history_index input must be of type dict.")
+    
+    def test_get_portfolio_valuation_index_holdings_empty(self):
+        with self.assertRaises(Exception) as context:
+            get_portfolio_valuation_index(
+                {},
+                {
+                    "XS1234567890": {
+                        "date": datetime.datetime(2000,1,1),
+                        "per_original_face_value": 100,
+                        "value": 101.50
+                    }
+                }
+            )
+        self.assertEqual(context.exception.args[0], "portfolio_holdings_index input must not be empty.")
+            
+    def test_get_portfolio_valuation_index(self):
+        
+        portfolio_holdings = {
+            "2000-01-03" : {
+                "date": "2000-01-03",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 100000
+                    }
+                }
+            },
+            "2000-02-03" : {
+                "date": "2000-02-03",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 100000
+                    },
+                    "XS12345678902": {
+                        "volume": 100000
+                    }
+                }
+            },
+            "2000-04-02" : {
+                "date": "2000-04-02",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 100000
+                    },
+                    "XS12345678902": {
+                        "volume": 0
+                    }
+                }
+            },
+            "2000-07-02" : {
+                "date": "2000-07-02",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 50000
+                    },
+                    "XS12345678902": {
+                        "volume": 0
+                    }
+                }
+            }
+        }
+        
+        price_history_index = {
+            "XS12345678901": {
+                "2000-01-01": {
+                    "date": datetime.datetime(2000,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 100.50
+                },
+                "2000-02-01": {
+                    "date": datetime.datetime(2000,2,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 101.50
+                },
+                "2000-03-31": {
+                    "date": datetime.datetime(2000,3,31),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 102.50
+                },
+                "2000-06-30": {
+                    "date": datetime.datetime(2000,6,30),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 103.50
+                }
+            },
+            "XS12345678902": {
+                "2000-01-01": {
+                    "date": datetime.datetime(2000,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 103.50
+                },
+                "2000-02-01": {
+                    "date": datetime.datetime(2000,2,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 102.50
+                },
+                "2000-03-31": {
+                    "date": datetime.datetime(2000,3,31),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 101.50
+                },
+                "2000-06-30": {
+                    "date": datetime.datetime(2000,6,30),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 100.50
+                },
+            }            
+        }
                 
         expected = {
             "2000-01-03" : {
@@ -247,7 +279,7 @@ class PortfolioValuationIndexTestCase(unittest.TestCase):
                         "AUD": 204000,
                     },
                     "position_valuation": {
-                        "XS1234567890": {
+                        "XS12345678901": {
                             "currency": "AUD",
                             "volume": 100000,
                             "price": {
@@ -259,7 +291,7 @@ class PortfolioValuationIndexTestCase(unittest.TestCase):
                             },
                             "valuation": 101500.00
                         },
-                        "XS1234567891": {
+                        "XS12345678902": {
                             "currency": "AUD",
                             "volume": 100000,
                             "price": {
@@ -281,7 +313,7 @@ class PortfolioValuationIndexTestCase(unittest.TestCase):
                         "AUD": 102500,
                     },
                     "position_valuation": {
-                        "XS1234567890": {
+                        "XS12345678901": {
                             "currency": "AUD",
                             "volume": 100000,
                             "price": {
@@ -293,7 +325,7 @@ class PortfolioValuationIndexTestCase(unittest.TestCase):
                             },
                             "valuation": 102500.00
                         },
-                        "XS1234567891": {
+                        "XS12345678902": {
                             "currency": "AUD",
                             "volume": 0,
                             "price": {
@@ -312,10 +344,10 @@ class PortfolioValuationIndexTestCase(unittest.TestCase):
                 "date": datetime.datetime(2000,7,2),
                 "valuation": {
                     "total_valuation": {
-                        "AUD": 102500,
+                        "AUD": 51750,
                     },
                     "position_valuation": {
-                        "XS1234567890": {
+                        "XS12345678901": {
                             "currency": "AUD",
                             "volume": 50000,
                             "price": {
@@ -325,9 +357,9 @@ class PortfolioValuationIndexTestCase(unittest.TestCase):
                                 "base_currency_conversion_rate": 1.00,
                                 "value": 103.50
                             },
-                            "valuation": 102500.00
+                            "valuation": 51750.00
                         },
-                        "XS1234567891": {
+                        "XS12345678902": {
                             "currency": "AUD",
                             "volume": 0,
                             "price": {
@@ -344,12 +376,13 @@ class PortfolioValuationIndexTestCase(unittest.TestCase):
             }
         }
         
+        result = get_portfolio_valuation_index(
+            portfolio_holdings,
+            price_history_index
+        )
+        
         self.assertEqual(
-            get_portfolio_valuation_index(
-                datetime.datetime(2000,10,1),
-                portfolio_holdings,
-                price_history_index
-            ), 
+            result, 
             expected
         )
         
@@ -414,12 +447,7 @@ class PortfolioValuationTestCase(unittest.TestCase):
         self.assertEqual(context.exception.args[0], "holdings must not be empty.")
         
     def test_get_portfolio_valuation_single_currency_single_holding(self):
-        # Single Holding
-        # Multiple Holding
-        # No prices
-        # One holding with no prices
-        # Differing Currency
-        
+                
         self.assertEqual(
             get_portfolio_valuation(
                 datetime.datetime(2000,1,1),

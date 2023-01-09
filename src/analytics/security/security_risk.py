@@ -82,6 +82,9 @@ def calculate_macaulay_duration(
     cashflows: List[Dict],
     yield_to_final: float
 ) -> float:
+    assert len(cashflows) > 1, "Error: cashflows list must contain at least two elements."
+    assert yield_to_final > 0, "Error: yield to final must be greater than zero."
+    
     simple_cashflows = [
         {'date': _default_date(cashflow['date']['payment_date']), 'cashflow': cashflow['cashflow']['total']}
         for cashflow
@@ -107,8 +110,7 @@ def calculate_macaulay_duration(
         in cashflows 
         if _default_date(cashflow['date']['payment_date']) > pricing_date
     ]
-    
-    periods = range(1, len(relevant_cashflows))
+
     times_to_receipt = [
         ((ind + 1) - days_into_current_coupon_period/coupon_period_in_days)
         for ind, payment_date

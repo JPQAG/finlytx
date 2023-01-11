@@ -44,14 +44,14 @@ class PortfolioFutureCashflowsTest(unittest.TestCase):
             "date": "2000-01-01",
             "holdings": {
                 "XS12345678901": {
-                    "volume": 100000
+                    "volume": 100000.0
                 },
                 "XS12345678902": {
-                    "volume": 100000
+                    "volume": 100000.0
                 }
             }
         }
-        
+                
         security_lifetime_cashflow_object = {
             "XS12345678901" : {
                 "2000-02-01": {
@@ -185,7 +185,7 @@ class PortfolioFutureCashflowsTest(unittest.TestCase):
                 }
             },
             "2000-03-01": {
-                "XS12345678902": {
+                "XS12345678901": {
                     'date': {
                         "payment_date": "2000-03-01",
                         "record_date": "2000-02-22",
@@ -243,6 +243,7 @@ class PortfolioFutureCashflowsTest(unittest.TestCase):
         self.maxDiff = None
     
         self.assertDictEqual(result, expected_result)
+    
     
     
     

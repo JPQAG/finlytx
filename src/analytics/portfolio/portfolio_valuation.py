@@ -5,7 +5,6 @@ from src.analytics.utils.date_time import (
     _default_date
 )
 
-from typing import Dict
 import datetime
 
 def get_portfolio_valuation_index(
@@ -44,7 +43,6 @@ def get_portfolio_valuation_index(
         )
     
     return portfolio_valuation_index
-
 
 def get_portfolio_valuation(
     pricing_date: datetime.datetime,

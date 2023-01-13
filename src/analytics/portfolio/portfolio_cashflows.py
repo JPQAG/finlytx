@@ -22,6 +22,7 @@ def get_portfolio_future_cashflows(
         cashflow profiles of those holdings.
         
     * Uses the portfolio holdings date attribute as the effective pricing date.
+    * Includes only cashflows that have not yet reached their record ex date.
 
     Args:
         portfolio_holdings (Dict): A dictionary containing the portfolio holdings and the effective pricing date.
@@ -47,6 +48,11 @@ def get_portfolio_future_cashflows(
         
         for date, cashflow in security_cashflows.items():
             
+            ex_coupon_date = _default_date(cashflow['date']['ex_date'])
+            payment_date = _default_date(cashflow['date']['payment_date'])
+            if ex_coupon_date < pricing_date < payment_date:
+                continue
+            
             if _default_date(date) < pricing_date:
                 continue
             
@@ -67,3 +73,5 @@ def get_portfolio_future_cashflows(
     portfolio_future_cashflows = {k: v for k, v in sorted(portfolio_future_cashflows.items(), key=lambda item: _default_date(item[0]))}
             
     return portfolio_future_cashflows
+
+

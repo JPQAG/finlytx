@@ -32,7 +32,7 @@ def get_portfolio_performance(
     prices: Dict,
     cashflows: Dict,
     holdings: Dict
-):
+) -> Dict:
     """Get the portfolio performance between two dates as a change in dollar value (valuation change and cashflow_income).
     
     # Add/subtract change in valuation
@@ -76,20 +76,65 @@ def get_portfolio_performance(
     
     portfolio_performance = {
         'pricing_date': pricing_date,
-        'start_date': start_valuation[]
+        'start_date': start_valuation['valuation_date'],
+        'end_date': end_valuation['valuation_date']
     }
     
     portfolio_performance['investment_value_change'] = {}
-    portfolio_performance['investment_value_change']['valuation_change'] = end_valuation - start_valuation
+    portfolio_performance['investment_value_change']['valuation_change'] = get_portfolio_valuation_difference(
+        start_valuation,
+        end_valuation
+    )
     portfolio_performance['investment_value_change']['cashflow_income'] = get_portfolio_historical_cashflows(
         pricing_date,
         holdings,
         cashflows
     )
     
-    
-    
     return portfolio_performance
-    
-    
 
+def get_portfolio_valuation_difference(
+    start_valuation: Dict,
+    end_valuation: Dict
+) -> Dict:
+    """Get the difference between two portfolio valuations.
+    
+    Args:
+        start_valuation (Dict): The start valuation of the portfolio.
+        end_valuation (Dict): The end valuation of the portfolio.
+        
+    Raises:
+        Exception: If the start_valuation is not of type dict.
+        Exception: If the end_valuation is not of type dict.
+    
+    Returns:
+        Dict: The portfolio valuation difference dictionary.
+    
+    """
+    assert isinstance(start_valuation, dict), "start_valuation input must be of type dict."
+    assert isinstance(end_valuation, dict), "end_valuation input must be of type dict."
+    
+    assert len(start_valuation) > 0, "start_valuation input must not be empty."
+    assert len(end_valuation) > 0, "end_valuation input must not be empty."
+    
+    portfolio_valuation_difference = {}
+    
+    start_date = start_valuation['valuation_date']
+    start_val = start_valuation[start_date].get('valuation', 0)
+    end_date = end_valuation['valutaion_date']
+    end_val = end_valuation[end_date].get('valuation', 0)
+    currencies = list(set(start_val.keys()) | set(end_val.keys()))
+        
+    portfolio_valuation_difference = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "valuation_change": {
+            "date": "2001-01-01",
+            "valuation": {}
+        }
+    }
+    
+    for currency in currencies:
+        portfolio_valuation_difference['valuation_change']['valuation'][currency] = end_val[currency] - start_val[currency]
+            
+    return portfolio_valuation_difference

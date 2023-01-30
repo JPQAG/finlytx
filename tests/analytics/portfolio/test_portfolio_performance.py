@@ -383,10 +383,12 @@ class PortfolioPerformanceTestCase(unittest.TestCase):
         
         pricing_date = datetime.datetime(2000,1,1)
         start_valuation = {
+            "valuation_date": "2000-01-01",
             "total_valuation": {},
             "position_valuation": {}
         }
         end_valuation = {
+            "valuation_date": "2001-01-01",
             "total_valuation": {
                 "AUD": 101500,
                 "USD": 101500
@@ -505,6 +507,28 @@ class PortfolioPerformanceTestCase(unittest.TestCase):
                         "volume": 100000
                     }
                 }
+            },
+            "2000-04-02" : {
+                "date": "2000-04-02",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 100000
+                    },
+                    "XS12345678902": {
+                        "volume": 0
+                    }
+                }
+            },
+            "2000-07-02" : {
+                "date": "2000-07-02",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 50000
+                    },
+                    "XS12345678902": {
+                        "volume": 0
+                    }
+                }
             }
         }
         prices = {
@@ -561,4 +585,3 @@ class PortfolioPerformanceTestCase(unittest.TestCase):
         result = get_portfolio_performance(pricing_date, start_valuation, end_valuation, prices, cashflows, holdings)
         
         self.assertEqual(result, expected)
-

@@ -75,13 +75,13 @@ def get_portfolio_performance(
     assert len(holdings) > 0, "holdings input must not be empty."
     
     portfolio_performance = {
-        'pricing_date': pricing_date,
+        'pricing_date': pricing_date.strftime("%Y-%m-%d"),
         'start_date': start_valuation['valuation_date'],
         'end_date': end_valuation['valuation_date']
     }
     
     portfolio_performance['investment_value_change'] = {}
-    portfolio_performance['investment_value_change']['valuation_change'] = get_portfolio_valuation_difference(
+    portfolio_performance['investment_value_change'] = get_portfolio_valuation_difference(
         start_valuation,
         end_valuation
     )
@@ -120,21 +120,18 @@ def get_portfolio_valuation_difference(
     portfolio_valuation_difference = {}
     
     start_date = start_valuation['valuation_date']
-    start_val = start_valuation[start_date].get('valuation', 0)
-    end_date = end_valuation['valutaion_date']
-    end_val = end_valuation[end_date].get('valuation', 0)
+    start_val = start_valuation.get('total_valuation', {})
+    end_date = end_valuation['valuation_date']
+    end_val = end_valuation.get('total_valuation', {})
     currencies = list(set(start_val.keys()) | set(end_val.keys()))
         
     portfolio_valuation_difference = {
-        "start_date": start_date,
-        "end_date": end_date,
-        "valuation_change": {
-            "date": "2001-01-01",
-            "valuation": {}
-        }
+        "valuation_change": {}
     }
     
     for currency in currencies:
-        portfolio_valuation_difference['valuation_change']['valuation'][currency] = end_val[currency] - start_val[currency]
+        start_valuation_value = start_val.get(currency, 0)
+        end_valuation_value = end_val.get(currency, 0)
+        portfolio_valuation_difference['valuation_change'][currency] = end_valuation_value - start_valuation_value
             
     return portfolio_valuation_difference

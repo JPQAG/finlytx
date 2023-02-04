@@ -68,3 +68,78 @@ class PortfolioHoldingsTestCase(unittest.TestCase):
         )
         
         self.assertEqual(result, expected)
+        
+class HoldingsDelta(unittest.TestCase):
+    
+    def test_get_holdings_delta(self):
+        
+        start_date = "2000-01-03"
+        end_date = "2000-07-02"
+        holdings_index = {
+            "2000-01-03" : {
+                "date": "2000-01-03",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 100000
+                    }
+                }
+            },
+            "2000-02-03" : {
+                "date": "2000-02-03",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 100000
+                    },
+                    "XS12345678902": {
+                        "volume": 100000
+                    }
+                }
+            },
+            "2000-04-02" : {
+                "date": "2000-04-02",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 100000
+                    },
+                    "XS12345678902": {
+                        "volume": 0
+                    }
+                }
+            },
+            "2000-07-02" : {
+                "date": "2000-07-02",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 50000
+                    },
+                    "XS12345678902": {
+                        "volume": 0
+                    }
+                }
+            }
+        }
+        
+        expected = {
+            "start_date": "2000-01-03",
+            "end_date": "2000-07-02",
+            "holdings_delta": {
+                "XS12345678901": {
+                    "volume": -50000
+                },
+                "XS12345678902": {
+                    "volume": 100000
+                }
+            }
+        }
+        
+        result = get_holdings_delta(
+            start_date,
+            end_date,
+            holdings_index
+        )
+        
+        self.assertEqual(result, expected)
+        
+        
+        
+        

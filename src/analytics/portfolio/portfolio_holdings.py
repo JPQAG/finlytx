@@ -27,3 +27,23 @@ def get_holdings_from_trades(
         }
         
     return holdings_dict
+
+def get_holdings_delta(
+    start_date: datetime.datetime,
+    end_date: datetime.datetime,
+    holdings: Dict
+) -> Dict:
+    securities = list(set(holding.keys() for date in holdings.values() for holding in date["holdings"].values()))
+    
+    holdings_delta_object = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "holdings_delta": {}
+    }
+    
+    for security in securities:
+        
+        
+        holdings_delta_object['holdings_delta'][security] = {
+            "volume": 
+        }

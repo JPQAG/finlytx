@@ -81,17 +81,18 @@ def get_portfolio_performance_index(
         valuation_at_end = portfolio_valuation_index[ending_date]
         index_at_start = performance_index['index'][holdings_dates[i - 1]]['index_values']
         
+        # 
         
         # performance change between two dates
-        peformance = get_portfolio_performance(
+        period_peformance = get_portfolio_performance(
             pricing_date=pricing_date,
-            start_va   
+            start_valuation=valuation_at_start,
+            end_valuation=valuation_at_end,
+            prices=prices,
+            cashflows=cashflows,
+            holdings=holdings
         )
-        
-        
-
-    
-    
+          
 def get_portfolio_performance(
     pricing_date: datetime.datetime,
     start_valuation: Dict,

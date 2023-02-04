@@ -16,7 +16,8 @@ from src.analytics.utils.pricing import (
     get_accrued_interest,
     get_pricing_history,
     get_period_total_return,
-    get_annualised_return
+    get_annualised_return,
+    get_unique_currencies
 )
 
 class AccruedInterestTestCase(unittest.TestCase):
@@ -234,3 +235,50 @@ class HistoricalReturnsTestCase(unittest.TestCase):
         )
         
         self.assertEqual(expected_annualised_return, round(result,5))
+        
+class GetCurrenciesFromPricesTestCase(unittest.TestCase):
+    
+    def test_get_unique_currencies(self):
+        
+        prices = {
+            "XS1234567890": {
+                "2000-01-01": {
+                    "date": datetime(2000,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 99.50
+                },
+                "2001-01-01": {
+                    "date": datetime(2001,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 101.50
+                },
+            },
+            "XS1234567891": {
+                "2000-01-01": {
+                    "date": datetime(2000,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "USD",
+                    "base_currency_conversion_rate": 0.75,
+                    "value": 99.50
+                },
+                "2001-01-01": {
+                    "date": datetime(2001,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "USD",
+                    "base_currency_conversion_rate": 0.75,
+                    "value": 101.50
+                }
+            }
+        }
+        
+        expected = ["AUD", "USD"]
+        
+        result = get_unique_currencies(prices)
+        
+        self.assertEqual(expected, result)
+        
+        

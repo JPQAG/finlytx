@@ -9,22 +9,89 @@ from src.analytics.portfolio.portfolio_cashflows import (
     get_portfolio_historical_cashflows
 )
 
+from src.analytics.portfolio.portfolio_valuation import (
+    get_portfolio_valuation_index
+)
+
+from src.analytics.utils.pricing import (
+    get_unique_currencies
+)
+
 def get_portfolio_performance_index(
     pricing_date: datetime.datetime,
+    trades: Dict,
     holdings: Dict,
     cashflows: Dict,
-    prices: Dict
+    prices: Dict,
 ) -> Dict:
-    """Get the portfolio performance between two dates where there is unchanged holdings.
+    """Create an index representing the change in value from a base value from the first to last holding date.
+    
+    ** Change in index is the change in valuation plus the change in cashflow between two dates.
+    ** Currency Conversion/enhancement done at a higher level? Keep currencies separate?
+        ** Valuation, cashflow and investment changes are all separated by currency.
+        ** Therefore there is an index for each currency.
+        ** All indices start at 100 on the first holdings date.
+    
+    * Start at first holdings date. Finish at pricing_date
+    * get portfolio performance between each 
+    * Include cashflows between each holdings date.
+    
+    
     """
     assert isinstance(pricing_date, datetime.datetime), "pricing_date input must be of type datetime.datetime."
+    assert isinstance(trades, dict), "trades input must be of type dict."
     assert isinstance(holdings, dict), "holdings input must be of type dict."
     assert isinstance(cashflows, dict), "cashflows input must be of type dict."
     assert isinstance(prices, dict), "prices input must be of type dict."
     assert len(holdings) > 0, "holdings input must not be empty."
+    assert len(trades) > 0, "trades input must not be empty."
     assert len(cashflows) > 0, "cashflows input must not be empty."
     assert len(prices) > 0, "prices input must not be empty."
+    
+    holdings_dates = list(holdings.keys())
+    unique_currencies = get_unique_currencies(prices)
+    performance_index = {
+        "start_date": holdings_dates[0],
+        "end_date": pricing_date,
+        "index": {}
+    }
+    starting_index_value = 100
+    portfolio_valuation_index = get_portfolio_valuation_index(
+        holdings,
+        prices
+    )
+    
+    
+    for i in range(0, len(holdings_dates) - 1):
+        starting_date = holdings_dates[i]
+        ending_date = holdings_dates[i + 1]
+        
+        if i == 0:
+            performance_index['index'][holdings_dates[i]] = {
+                "date": holdings_dates[i],
+                "index_values": {},
+                "performance_since_last": {}
+            }
+            
+            for currency in unique_currencies:
+                performance_index['index'][holdings_dates[i]]['index_values'][currency] = starting_index_value
+            continue
+        
+        valuation_at_start = portfolio_valuation_index[starting_date]
+        valuation_at_end = portfolio_valuation_index[ending_date]
+        index_at_start = performance_index['index'][holdings_dates[i - 1]]['index_values']
+        
+        
+        # performance change between two dates
+        peformance = get_portfolio_performance(
+            pricing_date=pricing_date,
+            start_va   
+        )
+        
+        
 
+    
+    
 def get_portfolio_performance(
     pricing_date: datetime.datetime,
     start_valuation: Dict,

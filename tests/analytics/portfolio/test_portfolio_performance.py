@@ -20,15 +20,17 @@ class portfolioPerformanceIndexTestCase(unittest.TestCase):
     def test_incorrect_input_type(self):
         
         pricing_date = datetime.datetime(2000,1,1)
+        trades = { "trades": "not_empty" }
         holdings = { "holdings": "not_empty" }
         cashflows = { "cashflows": "not_empty" }
         prices = { "prices": "not_empty" }
         
         test_cases = [
-            ("2000-01-01", holdings, cashflows, prices, f'pricing_date input must be of type datetime.datetime.'),
-            (pricing_date, "holdings", cashflows, prices, f'holdings input must be of type dict.'),
-            (pricing_date, holdings, "cashflows", prices, f'cashflows input must be of type dict.'),
-            (pricing_date, holdings, cashflows, "prices", f'prices input must be of type dict.'),
+            ("2000-01-01", trades, holdings, cashflows, prices, f'pricing_date input must be of type datetime.datetime.'),
+            (pricing_date, "trades", holdings, cashflows, prices, f'trades input must be of type dict.')
+            (pricing_date, trades, "holdings", cashflows, prices, f'holdings input must be of type dict.'),
+            (pricing_date, trades, holdings, "cashflows", prices, f'cashflows input must be of type dict.'),
+            (pricing_date, trades, holdings, cashflows, "prices", f'prices input must be of type dict.'),
         ]
         
         for test_case in test_cases:
@@ -39,16 +41,285 @@ class portfolioPerformanceIndexTestCase(unittest.TestCase):
     def test_empty_input(self):
         
         pricing_date = datetime.datetime(2000,1,1)
+        trades = { "trades": "not_empty" }
         holdings = { "holdings": "not_empty" }
         cashflows = { "cashflows": "not_empty" }
         prices = { "prices": "not_empty" }
         
-        test_raises(self, get_portfolio_performance_index(pricing_date, {}, cashflows, prices), f'holdings must not be empty.')
-        test_raises(self, get_portfolio_performance_index(pricing_date, holdings, {}, prices), f'cashflows must not be empty.')
-        test_raises(self, get_portfolio_performance_index(pricing_date, holdings, cashflows, {}), f'prices must not be empty.')
+        test_cases = [
+            (pricing_date, {}, holdings, cashflows, prices, f'trades input must not be empty.')
+            (pricing_date, holdings, {}, cashflows, prices, f'holdings input must not be empty.'),
+            (pricing_date, trades, holdings, {}, prices, f'cashflows input must not be empty.'),
+            (pricing_date, trades, holdings, cashflows, {}, f'prices input must not be empty.')
+        ]
+        
+        for test_case in test_cases:
+            with self.assertRaises(Exception) as context:
+                get_portfolio_performance_index(*test_case[:-1])
+            self.assertEqual(context.exception.args[0], test_case[-1])
     
     def test_portfolio_performance_index(self):
-        pass
+        pricing_date = datetime.datetime(2001,1,1)
+        start_valuation = {
+            "valuation_date": "2000-01-01",
+            "total_valuation": {},
+            "position_valuation": {}
+        }
+        end_valuation = {
+            "valuation_date": "2001-01-01",
+            "total_valuation": {
+                "AUD": 101500,
+                "USD": 101500
+            },
+            "position_valuation": {
+                "XS1234567890": {
+                    "currency": "AUD",
+                    "volume": 100000,
+                    "price": {
+                        "date": datetime.datetime(2000,1,1),
+                        "per_original_face_value": 100,
+                        "currency": "AUD",
+                        "base_currency_conversion_rate": 1.00,
+                        "value": 101.50
+                    },
+                    "valuation": 101500.00
+                },
+                "XS1234567891": {
+                    "currency": "USD",
+                    "volume": 100000,
+                    "price": {
+                        "date": datetime.datetime(2000,1,1),
+                        "per_original_face_value": 100,
+                        "currency": "USD",
+                        "base_currency_conversion_rate": 0.75,
+                        "value": 101.50
+                    },
+                    "valuation": 101500.00
+                }
+            }
+        }
+        cashflows = {
+            "XS12345678901" : {
+                "2000-02-01": {
+                    'date': {
+                        "payment_date": "2000-02-01",
+                        "record_date": "2000-01-24",
+                        "ex_date": "2000-01-23"
+                    },
+                    'cashflow': {
+                        'total': 0.05 / 12 * 100,
+                        'coupon_interest': {
+                            'fixed_coupon_interest_component': 0.05 / 12 * 100,
+                            'variable_coupon_interest_component': 0.0,
+                            'total_coupon_interest': 0.05 / 12 * 100,
+                        },
+                        'principal': {
+                            'redemption_principal': 0.0,
+                            'amortising': 0.0,
+                            'total_principal': 0.0
+                        }
+                    }
+                },
+                "2000-03-01":{
+                    'date': {
+                        "payment_date": "2000-03-01",
+                        "record_date": "2000-02-22",
+                        "ex_date": "2000-02-21"
+                    },
+                    'cashflow': {
+                        'total': 0.05 / 12  * 100,
+                        'coupon_interest': {
+                            'fixed_coupon_interest_component': 0.05 / 12  * 100,
+                            'variable_coupon_interest_component': 0.0,
+                            'total_coupon_interest': 0.05 / 12  * 100,
+                        },
+                        'principal': {
+                            'redemption_principal': 0.0,
+                            'amortising': 0.0,
+                            'total_principal': 0.0
+                        }
+                    }
+                }
+            },
+            "XS12345678902": {
+                "2000-02-02": {
+                    'date': {
+                        "payment_date": "2000-02-02",
+                        "record_date": "2000-01-25",
+                        "ex_date": "2000-01-24"
+                    },
+                    'cashflow': {
+                        'total': 0.05 / 12  * 100,
+                        'coupon_interest': {
+                            'fixed_coupon_interest_component': 0.05 / 12  * 100,
+                            'variable_coupon_interest_component': 0.0,
+                            'total_coupon_interest': 0.05 / 12  * 100,
+                        },
+                        'principal': {
+                            'redemption_principal': 0.0,
+                            'amortising': 0.0,
+                            'total_principal': 0.0
+                        }
+                    }
+                },
+                "2000-03-02": {
+                    'date': {
+                        "payment_date": "2000-03-02",
+                        "record_date": "2000-02-25",
+                        "ex_date": "2000-02-22"
+                    },
+                    'cashflow': {
+                        'total': 0.05 / 12  * 100,
+                        'coupon_interest': {
+                            'fixed_coupon_interest_component': 0.05 / 12  * 100,
+                            'variable_coupon_interest_component': 0.0,
+                            'total_coupon_interest': 0.05 / 12  * 100,
+                        },
+                        'principal': {
+                            'redemption_principal': 0.0,
+                            'amortising': 0.0,
+                            'total_principal': 0.0
+                        }
+                    }
+                },
+                "2001-03-02": {
+                    'date': {
+                        "payment_date": "2001-03-02",
+                        "record_date": "2001-02-25",
+                        "ex_date": "2001-02-24"
+                    },
+                    'cashflow': {
+                        'total': 0.05 / 12  * 100,
+                        'coupon_interest': {
+                            'fixed_coupon_interest_component': 0.05 / 12  * 100,
+                            'variable_coupon_interest_component': 0.0,
+                            'total_coupon_interest': 0.05 / 12  * 100,
+                        },
+                        'principal': {
+                            'redemption_principal': 0.0,
+                            'amortising': 0.0,
+                            'total_principal': 0.0
+                        }
+                    }
+                }
+            }
+        }
+        holdings = {
+            "2000-01-03" : {
+                "date": "2000-01-03",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 100000
+                    }
+                }
+            },
+            "2000-02-03" : {
+                "date": "2000-02-03",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 100000
+                    },
+                    "XS12345678902": {
+                        "volume": 100000
+                    }
+                }
+            },
+            "2000-04-02" : {
+                "date": "2000-04-02",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 100000
+                    },
+                    "XS12345678902": {
+                        "volume": 0
+                    }
+                }
+            },
+            "2000-07-02" : {
+                "date": "2000-07-02",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 50000
+                    },
+                    "XS12345678902": {
+                        "volume": 0
+                    }
+                }
+            }
+        }
+        prices = {
+            "XS1234567890": {
+                "2000-01-01": {
+                    "date": datetime.datetime(2000,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 99.50
+                },
+                "2001-01-01": {
+                    "date": datetime.datetime(2001,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 101.50
+                },
+            },
+            "XS1234567891": {
+                "2000-01-01": {
+                    "date": datetime.datetime(2000,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "USD",
+                    "base_currency_conversion_rate": 0.75,
+                    "value": 99.50
+                },
+                "2001-01-01": {
+                    "date": datetime.datetime(2001,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "USD",
+                    "base_currency_conversion_rate": 0.75,
+                    "value": 101.50
+                }
+            }
+        }
+        
+        expected = {
+            "start_date": "2000-01-03",
+            "end_date": "2000-07-02",
+            "index": {
+                "2000-01-03" : {
+                    "date": "2000-01-03",
+                    "index_values": {
+                        "AUD": 100,
+                        "USD": 100
+                    },
+                    "performance_since_last": {}
+                },
+                "2000-02-03" : {
+                    "date": "2000-02-03",
+                    "index_values": {
+                        "AUD": 100,
+                        "USD": 100
+                    },
+                    "performance_since_last": {}
+                },
+                "2000-04-02" : {
+                    "date": "2000-04-02",
+                    "index_values": {
+                        "AUD": 100,
+                        "USD": 100
+                    },
+                    "performance_since_last": {}
+                },
+                "2000-07-02" : {
+                    "date": "2000-07-02",
+                    "index_values": {
+                        "AUD": 100,
+                        "USD": 100
+                    },
+                    "performance_since_last": {}
+                }
+            }
+        }       
 
 class PortfolioPerformanceTestCase(unittest.TestCase):
     
@@ -758,14 +1029,9 @@ class TestGetPortfolioValuationDifference(unittest.TestCase):
             }
         }
         expected = {
-            "start_date": "2000-01-01",
-            "end_date": "2001-01-01",
             "valuation_change": {
-                "date": "2001-01-01",
-                "valuation": {
-                    "AUD": 101500,
-                    "USD": 101500
-                }
+                "AUD": 101500,
+                "USD": 101500
             }
         }
         
@@ -843,14 +1109,9 @@ class TestGetPortfolioValuationDifference(unittest.TestCase):
         }
         
         expected = {
-            "start_date": "2000-01-01",
-            "end_date": "2001-01-01",
             "valuation_change": {
-                "date": "2001-01-01",
-                "valuation": {
-                    "AUD": 0,
-                    "USD": 0
-                }
+                "AUD": 0,
+                "USD": 0
             }
         }
         
@@ -929,14 +1190,9 @@ class TestGetPortfolioValuationDifference(unittest.TestCase):
         }
         
         expected = {
-            "start_date": "2000-01-01",
-            "end_date": "2001-01-01",
             "valuation_change": {
-                "date": "2001-01-01",
-                "valuation": {
-                    "AUD": 0,
-                    "USD": -50000
-                }
+                "AUD": 0,
+                "USD": -50000
             }
         }
         

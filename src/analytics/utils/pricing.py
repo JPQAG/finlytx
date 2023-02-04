@@ -159,5 +159,9 @@ def get_annualised_return(
     
     return annualised_return
     
+def get_unique_currencies(
+    prices: Dict,
+) -> List[str]:
+    currencies = [date_info["currency"] for security in prices.values() for date_info in security.values()]
         
-        
+    return list(set(currencies))

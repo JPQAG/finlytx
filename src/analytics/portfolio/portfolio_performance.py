@@ -48,6 +48,7 @@ def get_portfolio_performance_index(
     assert len(cashflows) > 0, "cashflows input must not be empty."
     assert len(prices) > 0, "prices input must not be empty."
     
+    starting_index_value = 100
     holdings_dates = list(holdings.keys())
     unique_currencies = get_unique_currencies(prices)
     performance_index = {
@@ -55,7 +56,6 @@ def get_portfolio_performance_index(
         "end_date": pricing_date,
         "index": {}
     }
-    starting_index_value = 100
     portfolio_valuation_index = get_portfolio_valuation_index(
         holdings,
         prices
@@ -75,13 +75,15 @@ def get_portfolio_performance_index(
             
             for currency in unique_currencies:
                 performance_index['index'][holdings_dates[i]]['index_values'][currency] = starting_index_value
+                
             continue
         
         valuation_at_start = portfolio_valuation_index[starting_date]
         valuation_at_end = portfolio_valuation_index[ending_date]
         index_at_start = performance_index['index'][holdings_dates[i - 1]]['index_values']
         
-        # 
+        # holdings quantity/face value change
+        
         
         # performance change between two dates
         period_peformance = get_portfolio_performance(

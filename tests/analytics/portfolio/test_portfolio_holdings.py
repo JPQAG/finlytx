@@ -1,7 +1,16 @@
 import unittest
 
 from src.analytics.portfolio.portfolio_holdings import (
-    get_holdings_from_trades
+    get_holdings_from_trades,
+    get_holdings_delta,
+    get_unique_securities_from_holdings,
+    get_dict_from_trade_list,
+    get_unique_securities_from_trades,
+    get_invested_capital_delta
+)
+
+from src.analytics.utils.date_time import (
+    _default_date
 )
 
 from ..helper.testConstants import (
@@ -73,8 +82,8 @@ class HoldingsDelta(unittest.TestCase):
     
     def test_get_holdings_delta(self):
         
-        start_date = "2000-01-03"
-        end_date = "2000-07-02"
+        start_date = _default_date("2000-01-03")
+        end_date = _default_date("2000-07-02")
         holdings_index = {
             "2000-01-03" : {
                 "date": "2000-01-03",
@@ -127,7 +136,7 @@ class HoldingsDelta(unittest.TestCase):
                     "volume": -50000
                 },
                 "XS12345678902": {
-                    "volume": 100000
+                    "volume": 0
                 }
             }
         }
@@ -141,5 +150,144 @@ class HoldingsDelta(unittest.TestCase):
         self.assertEqual(result, expected)
         
         
+class HoldingsUniqueSecurities(unittest.TestCase):
+    
+    def test_get_unique_securities_from_holdings(self):
+        holdings_index = {
+            "2000-01-03" : {
+                "date": "2000-01-03",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 100000
+                    }
+                }
+            },
+            "2000-02-03" : {
+                "date": "2000-02-03",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 100000
+                    },
+                    "XS12345678902": {
+                        "volume": 100000
+                    }
+                }
+            },
+            "2000-04-02" : {
+                "date": "2000-04-02",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 100000
+                    },
+                    "XS12345678902": {
+                        "volume": 0
+                    }
+                }
+            },
+            "2000-07-02" : {
+                "date": "2000-07-02",
+                "holdings": {
+                    "XS12345678901": {
+                        "volume": 50000
+                    },
+                    "XS12345678902": {
+                        "volume": 0
+                    }
+                }
+            }
+        }
+        
+        expected = ['XS12345678901', 'XS12345678902']
+        
+        result = get_unique_securities_from_holdings(holdings_index)
+        
+        self.assertEqual(result, expected)
+        
+class InvestedCapitalDelta(unittest.TestCase):
+    
+    def test_get_invested_capital_delta(self):
+        
+        trades_input = get_dict_from_trade_list(MOCK_TRADES_INDEX)
+                
+        result = get_invested_capital_delta(
+            _default_date("2000-01-01"),
+            _default_date("2000-07-02"),
+            trades_input
+        )
+        
+        expected = {
+            "start_date": "2000-01-01",
+            "end_date": "2000-07-02",
+            "invested_capital_delta": {
+                "XS12345678901": {
+                    "volume": 101500+(-100500/2)
+                },
+                "XS12345678902": {
+                    "volume": 100500+(-101500/2)+(-101500/2)
+                }
+            }
+        }
+        
+        self.assertEqual(result, expected)
+        
+class ConvertTradeListToDict(unittest.TestCase):
+    
+    def test_get_dict_from_trade_list(self):
+        
+        trades_input = MOCK_TRADES_INDEX
+        
+        expected = {
+            "2000-01-01":{
+                "trade_date": "2000-01-01",
+                "settlement_date": "2000-01-03",
+                "isin": "XS12345678901",
+                "side": "B",
+                "volume": 100000,
+                "price": 101.50
+            },
+            "2000-02-01": {
+                "trade_date": "2000-02-01",
+                "settlement_date": "2000-02-03",
+                "isin": "XS12345678902",
+                "side": "B",
+                "volume": 100000,
+                "price": 100.50
+            },
+            "2000-03-31": {
+                "trade_date": "2000-03-31",
+                "settlement_date": "2000-04-02",
+                "isin": "XS12345678902",
+                "side": "S",
+                "volume": 50000,
+                "price": 101.50
+            },
+            
+            "2000-06-30": {
+                "trade_date": "2000-06-30",
+                "settlement_date": "2000-07-02",
+                "isin": "XS12345678901",
+                "side": "S",
+                "volume": 50000,
+                "price": 100.50
+            }
+        }
+        
+        result = get_dict_from_trade_list(trades_input)
+        
+        #These needs fixing so that multiple trades on the same day are handled
+        self.assertEqual(result, expected)
+        self.assertEqual(True, False)
+        
+class TradesUniqueSecurites(unittest.TestCase):
+    
+    def test_get_unique_securities_from_trades(self):
+        trades = get_dict_from_trade_list(MOCK_TRADES_INDEX)
+    
+        result = get_unique_securities_from_trades(trades)
+        
+        expected = ['XS12345678901', 'XS12345678902']
+        
+        self.assertEqual(result, expected)
+                
         
         

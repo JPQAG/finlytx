@@ -26,11 +26,11 @@ class portfolioPerformanceIndexTestCase(unittest.TestCase):
         prices = { "prices": "not_empty" }
         
         test_cases = [
-            ("2000-01-01", trades, holdings, cashflows, prices, f'pricing_date input must be of type datetime.datetime.'),
-            (pricing_date, "trades", holdings, cashflows, prices, f'trades input must be of type dict.')
-            (pricing_date, trades, "holdings", cashflows, prices, f'holdings input must be of type dict.'),
-            (pricing_date, trades, holdings, "cashflows", prices, f'cashflows input must be of type dict.'),
-            (pricing_date, trades, holdings, cashflows, "prices", f'prices input must be of type dict.'),
+            ["2000-01-01", trades, holdings, cashflows, prices, f'pricing_date input must be of type datetime.datetime.'],
+            [pricing_date, "trades", holdings, cashflows, prices, f'trades input must be of type dict.'],
+            [pricing_date, trades, "holdings", cashflows, prices, f'holdings input must be of type dict.'],
+            [pricing_date, trades, holdings, "cashflows", prices, f'cashflows input must be of type dict.'],
+            [pricing_date, trades, holdings, cashflows, "prices", f'prices input must be of type dict.'],
         ]
         
         for test_case in test_cases:
@@ -47,10 +47,10 @@ class portfolioPerformanceIndexTestCase(unittest.TestCase):
         prices = { "prices": "not_empty" }
         
         test_cases = [
-            (pricing_date, {}, holdings, cashflows, prices, f'trades input must not be empty.')
-            (pricing_date, holdings, {}, cashflows, prices, f'holdings input must not be empty.'),
-            (pricing_date, trades, holdings, {}, prices, f'cashflows input must not be empty.'),
-            (pricing_date, trades, holdings, cashflows, {}, f'prices input must not be empty.')
+            [pricing_date, {}, holdings, cashflows, prices, f'trades input must not be empty.'],
+            [pricing_date, trades, {}, cashflows, prices, f'holdings input must not be empty.'],
+            [pricing_date, trades, holdings, {}, prices, f'cashflows input must not be empty.'],
+            [pricing_date, trades, holdings, cashflows, {}, f'prices input must not be empty.']
         ]
         
         for test_case in test_cases:
@@ -60,6 +60,40 @@ class portfolioPerformanceIndexTestCase(unittest.TestCase):
     
     def test_portfolio_performance_index(self):
         pricing_date = datetime.datetime(2001,1,1)
+        trades = {
+            "2000-01-01":{
+                "trade_date": "2000-01-01",
+                "settlement_date": "2000-01-03",
+                "isin": "XS12345678901",
+                "side": "B",
+                "volume": 100000,
+                "price": 101.50
+            },
+            "2000-02-01": {
+                "trade_date": "2000-02-01",
+                "settlement_date": "2000-02-03",
+                "isin": "XS12345678902",
+                "side": "B",
+                "volume": 100000,
+                "price": 100.50
+            },
+            "2000-03-31": {
+                "trade_date": "2000-03-31",
+                "settlement_date": "2000-04-02",
+                "isin": "XS12345678902",
+                "side": "S",
+                "volume": 50000,
+                "price": 101.50
+            },
+            "2000-06-30": {
+                "trade_date": "2000-06-30",
+                "settlement_date": "2000-07-02",
+                "isin": "XS12345678901",
+                "side": "S",
+                "volume": 50000,
+                "price": 100.50
+            }
+        }
         start_valuation = {
             "valuation_date": "2000-01-01",
             "total_valuation": {},
@@ -319,7 +353,18 @@ class portfolioPerformanceIndexTestCase(unittest.TestCase):
                     "performance_since_last": {}
                 }
             }
-        }       
+        }
+
+        result = get_portfolio_performance_index(
+            pricing_date,
+            trades,
+            holdings,
+            cashflows,
+            prices
+        )
+        
+        self.assertEqual(result, expected)
+
 
 class PortfolioPerformanceTestCase(unittest.TestCase):
     

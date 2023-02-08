@@ -76,7 +76,6 @@ def get_holdings_delta(
         
     return holdings_delta_object
         
-    
 def get_unique_securities_from_holdings(
     holdings: Dict
 ) -> List:
@@ -100,17 +99,55 @@ def get_dict_from_trade_list(
 ) -> Dict:
     
     trade_dict = {}
+    trade_dates = list(set([trade['trade_date'] for trade in trades]))
     
-    for trade in trades:
-        trade_dict[trade['trade_date']] = trade
+    for trade_date in trade_dates:
+        trades_on_date = [trade for trade in trades if trade['trade_date'] == trade_date]
+        trade_dict[trade_date] = trades_on_date
         
     return trade_dict
     
 def get_invested_capital_delta(
     start_date: datetime.datetime,
     end_date: datetime.datetime,
-    trades: Dict
+    trades: List
 ) -> Dict:
+    """
+        Calculates the change in invested capital for a given date range.
+
+        The function takes in a start date, end date and a dictionary of trades as inputs. 
+        The start date and end date define the date range for which the change in invested capital is to be calculated. 
+        The trades dictionary contains details of trades such as settlement date, current face value, volume, price, side and ISIN.
+
+        The function returns a dictionary with the invested capital delta for each unique security traded in the given date range. 
+        A trade is considered in the calculation only if its settlement date falls between the start and end dates (inclusive).
+
+        The invested capital delta is calculated as the product of the volume, price and the side of the trade, 
+        divided by the current face value (default value is 100 if current face value is not available). 
+        If the trade is a buy, the delta is positive. If the trade is a sell, the delta is negative.
+
+        Parameters:
+            start_date (datetime.datetime): The start date of the date range.
+            end_date (datetime.datetime): The end date of the date range.
+            trades (Dict): A dictionary of trades, containing details such as settlement date, current face value, volume, price, side and ISIN.
+
+        Returns:
+        Dict: A dictionary with the invested capital delta for each unique security traded in the given date range. The dictionary contains a start date, end date and a nested dictionary for invested capital delta for each security.
+
+        Example:
+        trades = [{'settlement_date': '2022-01-01', 'current_face_value': 100, 'volume': 10, 'price': 100, 'side': 'B', 'isin': 'ABC123'},
+                {'settlement_date': '2022-02-01', 'current_face_value': 100, 'volume': 20, 'price': 110, 'side': 'S', 'isin': 'ABC123'},
+                {'settlement_date': '2022-03-01', 'current_face_value': 90, 'volume': 5, 'price': 120, 'side': 'B', 'isin': 'XYZ456'}]
+        start_date = datetime.datetime(2022, 1, 1)
+        end_date = datetime.datetime(2022, 2, 28)
+        invested_capital_delta = get_invested_capital_delta(start_date, end_date, trades)
+        print(invested_capital_delta)
+        # Output:
+        # {'start_date': '2022-01-01',
+        #  'end_date': '2022-02-28',
+        #  'invested_capital_delta': {'ABC123': {'volume': 1000.0},
+        #                             'XYZ456': {'volume': 0}}}
+    """
     traded_securities = get_unique_securities_from_trades(trades)
     
     invested_capital_delta = {
@@ -119,11 +156,13 @@ def get_invested_capital_delta(
         "invested_capital_delta": {security: {'volume': 0} for security in traded_securities}
     }
     
-    for trade in trades.values():
+    for trade in trades:
         if not (start_date <= _default_date(trade['settlement_date']) <= end_date):
             continue
         
-        delta = trade['volume'] * trade['price'] if trade['side'] == 'B' else trade['volume'] * trade['price'] * -1
+        face_value = trade['current_face_value'] if trade['current_face_value'] else 100
+        
+        delta = (trade['volume'] * trade['price'] / face_value) if trade['side'] == 'B' else (trade['volume'] * trade['price'] / face_value * -1)
         
         invested_capital_delta['invested_capital_delta'][trade['isin']]['volume'] += delta
         
@@ -131,18 +170,10 @@ def get_invested_capital_delta(
 
         
 def get_unique_securities_from_trades(
-    trades: Dict
+    trades: List
 ) -> List:
-    assert isinstance(trades, dict), "Trades must be a dictionary."
+    assert isinstance(trades, List), "Trades must be a dictionary."
     assert len(trades) > 0, "Trades must not be empty."
-    
-    securities = []
-    
-    for trade in trades.values():
-        
-        if trade['isin'] not in securities:
-            securities.append(trade['isin'])
-            
-    return securities
-    
+     
+    return list(set([trade['isin'] for trade in trades]))    
     

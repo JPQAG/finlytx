@@ -279,6 +279,6 @@ class GetCurrenciesFromPricesTestCase(unittest.TestCase):
         
         result = get_unique_currencies(prices)
         
-        self.assertEqual(expected, result)
+        self.assertEqual(sorted(expected), sorted(result))
         
         

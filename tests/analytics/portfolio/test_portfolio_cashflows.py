@@ -1,4 +1,5 @@
 import unittest
+import datetime
 
 from src.analytics.utils.date_time import (
     _default_date
@@ -7,7 +8,8 @@ from src.analytics.utils.date_time import (
 from src.analytics.portfolio.portfolio_cashflows import (
     get_portfolio_future_cashflows,
     get_portfolio_historical_cashflows,
-    _get_cashflow_given_holdings
+    _get_cashflow_given_holdings,
+    get_performance_period_cashflow_income
 )
 
 class PortfolioFutureCashflowsTest(unittest.TestCase):
@@ -1076,4 +1078,88 @@ class PortfolioCashflowGivenHoldingsTest(unittest.TestCase):
         result = _get_cashflow_given_holdings(security_cashflow, security_id, portfolio_holdings, key_mapping)
         
         self.assertEqual(result, expected)
+        
+class PerformancePeriodCashflowIncomeTest(unittest.TestCase):
+    
+    def test_get_performance_period_cashflow_income(self):
+        
+        cashflow_income = {
+            "2000-02-01": {
+                "XS12345678901" : {
+                    'date': {
+                        "payment_date": "2000-02-01",
+                        "record_date": "2000-01-24",
+                        "ex_date": "2000-01-23"
+                    },
+                    'cashflow': {
+                        'total': 0.05 / 12 * 100000,
+                        'coupon_interest': {
+                            'fixed_coupon_interest_component': 0.05 / 12 * 100000,
+                            'variable_coupon_interest_component': 0 * 100000,
+                            'total_coupon_interest': 0.05 / 12 * 100000,
+                        },
+                        'principal': {
+                            'redemption_principal': 0 * 100000,
+                            'amortising': 0 * 100000,
+                            'total_principal': 0 * 100000
+                        }
+                    }
+                }
+            },
+            "2000-03-01": {
+                "XS12345678901": {
+                    'date': {
+                        "payment_date": "2000-03-01",
+                        "record_date": "2000-02-22",
+                        "ex_date": "2000-02-21"
+                    },
+                    'cashflow': {
+                        'total': 0.05 / 12  *100000,
+                        'coupon_interest': {
+                            'fixed_coupon_interest_component': 0.05 / 12  * 100000,
+                            'variable_coupon_interest_component': 0 * 100000,
+                            'total_coupon_interest': 0.05 / 12  * 100000,
+                        },
+                        'principal': {
+                            'redemption_principal': 0 * 100000,
+                            'amortising': 0 * 100000,
+                            'total_principal': 0 * 100000
+                        }
+                    }
+                }
+            },
+            "2000-03-02": {
+                "XS12345678902": {
+                    'date': {
+                        "payment_date": "2000-03-02",
+                        "record_date": "2000-02-25",
+                        "ex_date": "2000-02-22"
+                    },
+                    'cashflow': {
+                        'total': 0.05 / 12  * 100000,
+                        'coupon_interest': {
+                            'fixed_coupon_interest_component': 0.05 / 12  * 100000,
+                            'variable_coupon_interest_component': 0 * 100000,
+                            'total_coupon_interest': 0.05 / 12  * 100000,
+                        },
+                        'principal': {
+                            'redemption_principal': 0 * 100000,
+                            'amortising': 0 * 100000,
+                            'total_principal': 0 * 100000
+                        }
+                    }
+                }
+            }
+        }
+        start_date = datetime.datetime(2000, 2, 1)
+        end_date = datetime.datetime(2000, 3, 2)
+        
+        expected = (0.05 / 12 * 100000) + (0.05 / 12  *100000) + (0.05 / 12  * 100000)
+        
+        result = get_performance_period_cashflow_income(start_date, end_date, cashflow_income)
+        
+        self.assertEqual(result, expected)
+        
+        
+        
         

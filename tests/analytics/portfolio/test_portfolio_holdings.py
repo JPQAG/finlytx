@@ -207,7 +207,7 @@ class InvestedCapitalDelta(unittest.TestCase):
     
     def test_get_invested_capital_delta(self):
         
-        trades_input = get_dict_from_trade_list(MOCK_TRADES_INDEX)
+        trades_input = MOCK_TRADES_INDEX
                 
         result = get_invested_capital_delta(
             _default_date("2000-01-01"),
@@ -237,57 +237,81 @@ class ConvertTradeListToDict(unittest.TestCase):
         trades_input = MOCK_TRADES_INDEX
         
         expected = {
-            "2000-01-01":{
-                "trade_date": "2000-01-01",
-                "settlement_date": "2000-01-03",
-                "isin": "XS12345678901",
-                "side": "B",
-                "volume": 100000,
-                "price": 101.50
-            },
-            "2000-02-01": {
-                "trade_date": "2000-02-01",
-                "settlement_date": "2000-02-03",
-                "isin": "XS12345678902",
-                "side": "B",
-                "volume": 100000,
-                "price": 100.50
-            },
-            "2000-03-31": {
-                "trade_date": "2000-03-31",
-                "settlement_date": "2000-04-02",
-                "isin": "XS12345678902",
-                "side": "S",
-                "volume": 50000,
-                "price": 101.50
-            },
-            
-            "2000-06-30": {
-                "trade_date": "2000-06-30",
-                "settlement_date": "2000-07-02",
-                "isin": "XS12345678901",
-                "side": "S",
-                "volume": 50000,
-                "price": 100.50
-            }
+            "2000-01-01": [
+                {
+                    "trade_date": "2000-01-01",
+                    "settlement_date": "2000-01-03",
+                    "isin": "XS12345678901",
+                    "original_face_value": 100.00,
+                    "current_face_value": 100.00,
+                    "side": "B",
+                    "volume": 100000,
+                    "price": 101.50
+                }
+            ],
+            "2000-02-01": [
+                {
+                    "trade_date": "2000-02-01",
+                    "settlement_date": "2000-02-03",
+                    "isin": "XS12345678902",
+                    "original_face_value": 100.00,
+                    "current_face_value": 100.00,
+                    "side": "B",
+                    "volume": 100000,
+                    "price": 100.50
+                }
+            ],
+            "2000-03-31": [
+                {
+                    "trade_date": "2000-03-31",
+                    "settlement_date": "2000-04-02",
+                    "isin": "XS12345678902",
+                    "original_face_value": 100.00,
+                    "current_face_value": 100.00,
+                    "side": "S",
+                    "volume": 50000,
+                    "price": 101.50
+                },
+                {
+                    "trade_date": "2000-03-31",
+                    "settlement_date": "2000-04-02",
+                    "isin": "XS12345678902",
+                    "original_face_value": 100.00,
+                    "current_face_value": 100.00,
+                    "side": "S",
+                    "volume": 50000,
+                    "price": 101.50
+                }
+            ], 
+            "2000-06-30": [    
+                {
+                    "trade_date": "2000-06-30",
+                    "settlement_date": "2000-07-02",
+                    "isin": "XS12345678901",
+                    "original_face_value": 100.00,
+                    "current_face_value": 100.00,
+                    "side": "S",
+                    "volume": 50000,
+                    "price": 100.50
+                }
+            ]
         }
         
         result = get_dict_from_trade_list(trades_input)
         
-        #These needs fixing so that multiple trades on the same day are handled
         self.assertEqual(result, expected)
-        self.assertEqual(True, False)
+        
         
 class TradesUniqueSecurites(unittest.TestCase):
     
     def test_get_unique_securities_from_trades(self):
-        trades = get_dict_from_trade_list(MOCK_TRADES_INDEX)
+        trades = MOCK_TRADES_INDEX
     
         result = get_unique_securities_from_trades(trades)
         
         expected = ['XS12345678901', 'XS12345678902']
         
-        self.assertEqual(result, expected)
+        self.assertEqual(sorted(result), sorted(expected))
                 
         
         

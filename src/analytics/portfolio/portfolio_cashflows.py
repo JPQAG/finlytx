@@ -183,3 +183,31 @@ def _get_cashflow_given_holdings(
     return cashflow
                 
                 
+def get_performance_period_cashflow_income(
+    start_date: datetime.datetime,
+    end_date: datetime.datetime,
+    cashflow_income: Dict
+) -> float:
+    """Calculates the cashflow income for a given performance period.
+    
+    Args:
+        start_date (datetime.datetime): A datetime object containing the start date of the performance period.
+        end_date (datetime.datetime): A datetime object containing the end date of the performance period.
+        cashflow_income (Dict): A dictionary containing the cashflow income for a portfolio.
+    ```
+    Returns:
+        float: A float containing the cashflow income for a given performance period.
+    """
+    assert isinstance(start_date, datetime.datetime), "start_date input must be of type datetime.datetime."
+    assert isinstance(end_date, datetime.datetime), "end_date input must be of type datetime.datetime."
+    assert isinstance(cashflow_income, Dict), "cashflow_income input must be of type Dict."
+    assert cashflow_income, "cashflow_income input must not be empty."
+    
+    performance_period_cashflow_income = 0.00
+    
+    for date, security_cashflows in cashflow_income.items():
+        if start_date <= _default_date(date) <= end_date:
+            for isin, cashflow in security_cashflows.items():
+                performance_period_cashflow_income += cashflow['cashflow']['total']
+    
+    return performance_period_cashflow_income

@@ -246,6 +246,8 @@ MOCK_TRADES_INDEX = [
         "trade_date": "2000-01-01",
         "settlement_date": "2000-01-03",
         "isin": "XS12345678901",
+        "original_face_value": 100.00,
+        "current_face_value": 100.00,
         "side": "B",
         "volume": 100000,
         "price": 101.50
@@ -254,6 +256,8 @@ MOCK_TRADES_INDEX = [
         "trade_date": "2000-02-01",
         "settlement_date": "2000-02-03",
         "isin": "XS12345678902",
+        "original_face_value": 100.00,
+        "current_face_value": 100.00,
         "side": "B",
         "volume": 100000,
         "price": 100.50
@@ -262,6 +266,8 @@ MOCK_TRADES_INDEX = [
         "trade_date": "2000-03-31",
         "settlement_date": "2000-04-02",
         "isin": "XS12345678902",
+        "original_face_value": 100.00,
+        "current_face_value": 100.00,
         "side": "S",
         "volume": 50000,
         "price": 101.50
@@ -270,6 +276,8 @@ MOCK_TRADES_INDEX = [
         "trade_date": "2000-03-31",
         "settlement_date": "2000-04-02",
         "isin": "XS12345678902",
+        "original_face_value": 100.00,
+        "current_face_value": 100.00,
         "side": "S",
         "volume": 50000,
         "price": 101.50
@@ -278,6 +286,8 @@ MOCK_TRADES_INDEX = [
         "trade_date": "2000-06-30",
         "settlement_date": "2000-07-02",
         "isin": "XS12345678901",
+        "original_face_value": 100.00,
+        "current_face_value": 100.00,
         "side": "S",
         "volume": 50000,
         "price": 100.50

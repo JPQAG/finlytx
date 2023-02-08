@@ -5,8 +5,13 @@ from src.analytics.utils.date_time import (
     _default_date
 )
 
+from src.analytics.portfolio.portfolio_holdings import (
+    get_invested_capital_delta   
+)
+
 from src.analytics.portfolio.portfolio_cashflows import (
-    get_portfolio_historical_cashflows
+    get_portfolio_historical_cashflows,
+    get_performance_period_cashflow_income
 )
 
 from src.analytics.portfolio.portfolio_valuation import (
@@ -82,11 +87,13 @@ def get_portfolio_performance_index(
         valuation_at_end = portfolio_valuation_index[ending_date]
         index_at_start = performance_index['index'][holdings_dates[i - 1]]['index_values']
         
-        # holdings quantity/face value change
+        invested_capital_delta = get_invested_capital_delta(
+            _default_date(starting_date) + datetime.timedelta(days=1),
+            _default_date(ending_date),
+            trades
+        )
         
-        
-        # performance change between two dates
-        period_peformance = get_portfolio_performance(
+        period_performance = get_portfolio_performance(
             pricing_date=pricing_date,
             start_valuation=valuation_at_start,
             end_valuation=valuation_at_end,
@@ -94,6 +101,21 @@ def get_portfolio_performance_index(
             cashflows=cashflows,
             holdings=holdings
         )
+        
+        income = get_performance_period_cashflow_income(
+            starting_date,
+            ending_date,
+            period_performance['investment_value_change']['cashflow_income']
+        )
+        
+        for currency in unique_currencies:
+            valuation_change = period_performance['investment_value_change']['valuation_change'][currency]
+        
+        # performance_index['index'][holdings_dates[i]]['index_values'][currency] = 
+        
+        #INCOME CURRENCY NEEDS TO BE SPLIT OUT?
+        
+
           
 def get_portfolio_performance(
     pricing_date: datetime.datetime,

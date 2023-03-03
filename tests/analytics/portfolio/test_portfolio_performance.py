@@ -15,19 +15,19 @@ from src.analytics.portfolio.portfolio_performance import (
     get_portfolio_valuation_difference
 )
 
-class portfolioPerformanceIndexTestCase(unittest.TestCase):
+class PortfolioPerformanceIndexTestCase(unittest.TestCase):
     
     def test_incorrect_input_type(self):
         
         pricing_date = datetime.datetime(2000,1,1)
-        trades = { "trades": "not_empty" }
+        trades = [{},{},{}]
         holdings = { "holdings": "not_empty" }
         cashflows = { "cashflows": "not_empty" }
         prices = { "prices": "not_empty" }
         
         test_cases = [
             ["2000-01-01", trades, holdings, cashflows, prices, f'pricing_date input must be of type datetime.datetime.'],
-            [pricing_date, "trades", holdings, cashflows, prices, f'trades input must be of type dict.'],
+            [pricing_date, "trades", holdings, cashflows, prices, f'trades input must be of type list.'],
             [pricing_date, trades, "holdings", cashflows, prices, f'holdings input must be of type dict.'],
             [pricing_date, trades, holdings, "cashflows", prices, f'cashflows input must be of type dict.'],
             [pricing_date, trades, holdings, cashflows, "prices", f'prices input must be of type dict.'],
@@ -41,13 +41,13 @@ class portfolioPerformanceIndexTestCase(unittest.TestCase):
     def test_empty_input(self):
         
         pricing_date = datetime.datetime(2000,1,1)
-        trades = { "trades": "not_empty" }
+        trades = [{},{},{}]
         holdings = { "holdings": "not_empty" }
         cashflows = { "cashflows": "not_empty" }
         prices = { "prices": "not_empty" }
         
         test_cases = [
-            [pricing_date, {}, holdings, cashflows, prices, f'trades input must not be empty.'],
+            [pricing_date, [], holdings, cashflows, prices, f'trades input must not be empty.'],
             [pricing_date, trades, {}, cashflows, prices, f'holdings input must not be empty.'],
             [pricing_date, trades, holdings, {}, prices, f'cashflows input must not be empty.'],
             [pricing_date, trades, holdings, cashflows, {}, f'prices input must not be empty.']
@@ -60,78 +60,58 @@ class portfolioPerformanceIndexTestCase(unittest.TestCase):
     
     def test_portfolio_performance_index(self):
         pricing_date = datetime.datetime(2001,1,1)
-        trades = {
-            "2000-01-01":{
+        trades = [
+            {
                 "trade_date": "2000-01-01",
                 "settlement_date": "2000-01-03",
                 "isin": "XS12345678901",
+                "original_face_value": 100.00,
+                "current_face_value": 100.00,
                 "side": "B",
                 "volume": 100000,
                 "price": 101.50
             },
-            "2000-02-01": {
+            {
                 "trade_date": "2000-02-01",
                 "settlement_date": "2000-02-03",
+                "original_face_value": 100.00,
+                "current_face_value": 100.00,
                 "isin": "XS12345678902",
                 "side": "B",
                 "volume": 100000,
                 "price": 100.50
             },
-            "2000-03-31": {
+            {
                 "trade_date": "2000-03-31",
                 "settlement_date": "2000-04-02",
                 "isin": "XS12345678902",
+                "original_face_value": 100.00,
+                "current_face_value": 100.00,
                 "side": "S",
                 "volume": 50000,
                 "price": 101.50
             },
-            "2000-06-30": {
+            {
+                "trade_date": "2000-03-31",
+                "settlement_date": "2000-04-02",
+                "isin": "XS12345678902",
+                "original_face_value": 100.00,
+                "current_face_value": 100.00,
+                "side": "S",
+                "volume": 50000,
+                "price": 101.50
+            },
+            {
                 "trade_date": "2000-06-30",
                 "settlement_date": "2000-07-02",
                 "isin": "XS12345678901",
+                "original_face_value": 100.00,
+                "current_face_value": 100.00,
                 "side": "S",
                 "volume": 50000,
                 "price": 100.50
             }
-        }
-        start_valuation = {
-            "valuation_date": "2000-01-01",
-            "total_valuation": {},
-            "position_valuation": {}
-        }
-        end_valuation = {
-            "valuation_date": "2001-01-01",
-            "total_valuation": {
-                "AUD": 101500,
-                "USD": 101500
-            },
-            "position_valuation": {
-                "XS1234567890": {
-                    "currency": "AUD",
-                    "volume": 100000,
-                    "price": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "AUD",
-                        "base_currency_conversion_rate": 1.00,
-                        "value": 101.50
-                    },
-                    "valuation": 101500.00
-                },
-                "XS1234567891": {
-                    "currency": "USD",
-                    "volume": 100000,
-                    "price": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "USD",
-                        "base_currency_conversion_rate": 0.75,
-                        "value": 101.50
-                    },
-                    "valuation": 101500.00
-                }
-            }
-        }
+        ]
         cashflows = {
             "XS12345678901" : {
                 "2000-02-01": {
@@ -282,7 +262,7 @@ class portfolioPerformanceIndexTestCase(unittest.TestCase):
             }
         }
         prices = {
-            "XS1234567890": {
+            "XS12345678901": {
                 "2000-01-01": {
                     "date": datetime.datetime(2000,1,1),
                     "per_original_face_value": 100,
@@ -298,7 +278,7 @@ class portfolioPerformanceIndexTestCase(unittest.TestCase):
                     "value": 101.50
                 },
             },
-            "XS1234567891": {
+            "XS12345678902": {
                 "2000-01-01": {
                     "date": datetime.datetime(2000,1,1),
                     "per_original_face_value": 100,
@@ -318,7 +298,7 @@ class portfolioPerformanceIndexTestCase(unittest.TestCase):
         
         expected = {
             "start_date": "2000-01-03",
-            "end_date": "2000-07-02",
+            "end_date": "2001-01-01",
             "index": {
                 "2000-01-03" : {
                     "date": "2000-01-03",
@@ -334,7 +314,12 @@ class portfolioPerformanceIndexTestCase(unittest.TestCase):
                         "AUD": 100,
                         "USD": 100
                     },
-                    "performance_since_last": {}
+                    "performance_since_last": {
+                        "valuation_change": {
+                            "AUD": 0.0,
+                            "USD": 0.0
+                        }
+                    }
                 },
                 "2000-04-02" : {
                     "date": "2000-04-02",
@@ -360,11 +345,10 @@ class portfolioPerformanceIndexTestCase(unittest.TestCase):
             trades,
             holdings,
             cashflows,
-            prices
+            prices,
         )
         
         self.assertEqual(result, expected)
-
 
 class PortfolioPerformanceTestCase(unittest.TestCase):
     
@@ -727,42 +711,47 @@ class PortfolioPerformanceTestCase(unittest.TestCase):
         
         pricing_date = datetime.datetime(2001,1,1)
         start_valuation = {
-            "valuation_date": "2000-01-01",
-            "total_valuation": {},
-            "position_valuation": {}
+            "date": datetime.datetime(2000,1,1),
+            "valuation": {
+                "total_valuation": {},
+                "position_valuation": {}
+            }            
         }
         end_valuation = {
-            "valuation_date": "2001-01-01",
-            "total_valuation": {
-                "AUD": 101500,
-                "USD": 101500
-            },
-            "position_valuation": {
-                "XS1234567890": {
-                    "currency": "AUD",
-                    "volume": 100000,
-                    "price": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "AUD",
-                        "base_currency_conversion_rate": 1.00,
-                        "value": 101.50
-                    },
-                    "valuation": 101500.00
+            "date": datetime.datetime(2001,1,1),
+            "valuation": {
+                "total_valuation": {
+                    "AUD": 101500,
+                    "USD": 101500
                 },
-                "XS1234567891": {
-                    "currency": "USD",
-                    "volume": 100000,
-                    "price": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "USD",
-                        "base_currency_conversion_rate": 0.75,
-                        "value": 101.50
+                "position_valuation": {
+                    "XS1234567890": {
+                        "currency": "AUD",
+                        "volume": 100000,
+                        "price": {
+                            "date": datetime.datetime(2000,1,1),
+                            "per_original_face_value": 100,
+                            "currency": "AUD",
+                            "base_currency_conversion_rate": 1.00,
+                            "value": 101.50
+                        },
+                        "valuation": 101500.00
                     },
-                    "valuation": 101500.00
+                    "XS1234567891": {
+                        "currency": "USD",
+                        "volume": 100000,
+                        "price": {
+                            "date": datetime.datetime(2000,1,1),
+                            "per_original_face_value": 100,
+                            "currency": "USD",
+                            "base_currency_conversion_rate": 0.75,
+                            "value": 101.50
+                        },
+                        "valuation": 101500.00
+                    }
                 }
             }
+            
         }
         cashflows = {
             "XS12345678901" : {
@@ -1032,44 +1021,48 @@ class PortfolioPerformanceTestCase(unittest.TestCase):
         
         self.assertEqual(result, expected)
 
-class TestGetPortfolioValuationDifference(unittest.TestCase):
+class GetPortfolioValuationDifferenceTestCase(unittest.TestCase):
     
     def test_zero_to_non_zero(self):
         start_valuation = {
-            "valuation_date": "2000-01-01",
-            "total_valuation": {},
-            "position_valuation": {}
+            "date": datetime.datetime(2000,1,1),
+            "valuation": {
+                "total_valuation": {},
+                "position_valuation": {}
+            }            
         }
         end_valuation = {
-            "valuation_date": "2001-01-01",
-            "total_valuation": {
-                "AUD": 101500,
-                "USD": 101500
-            },
-            "position_valuation": {
-                "XS1234567890": {
-                    "currency": "AUD",
-                    "volume": 100000,
-                    "price": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "AUD",
-                        "base_currency_conversion_rate": 1.00,
-                        "value": 101.50
-                    },
-                    "valuation": 101500.00
+            "date": "2001-01-01",
+            "valuation": {
+                "total_valuation": {
+                    "AUD": 101500,
+                    "USD": 101500
                 },
-                "XS1234567891": {
-                    "currency": "USD",
-                    "volume": 100000,
-                    "price": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "USD",
-                        "base_currency_conversion_rate": 0.75,
-                        "value": 101.50
+                "position_valuation": {
+                    "XS1234567890": {
+                        "currency": "AUD",
+                        "volume": 100000,
+                        "price": {
+                            "date": datetime.datetime(2000,1,1),
+                            "per_original_face_value": 100,
+                            "currency": "AUD",
+                            "base_currency_conversion_rate": 1.00,
+                            "value": 101.50
+                        },
+                        "valuation": 101500.00
                     },
-                    "valuation": 101500.00
+                    "XS1234567891": {
+                        "currency": "USD",
+                        "volume": 100000,
+                        "price": {
+                            "date": datetime.datetime(2000,1,1),
+                            "per_original_face_value": 100,
+                            "currency": "USD",
+                            "base_currency_conversion_rate": 0.75,
+                            "value": 101.50
+                        },
+                        "valuation": 101500.00
+                    }
                 }
             }
         }
@@ -1086,69 +1079,73 @@ class TestGetPortfolioValuationDifference(unittest.TestCase):
         
     def test_no_change(self):
         start_valuation = {
-            "valuation_date": "2000-01-01",
-            "total_valuation": {
-                "AUD": 101500,
-                "USD": 101500
-            },
-            "position_valuation": {
-                "XS1234567890": {
-                    "currency": "AUD",
-                    "volume": 100000,
-                    "price": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "AUD",
-                        "base_currency_conversion_rate": 1.00,
-                        "value": 101.50
-                    },
-                    "valuation": 101500.00
+            "date": "2000-01-01",
+            "valuation": {
+                "total_valuation": {
+                    "AUD": 101500,
+                    "USD": 101500
                 },
-                "XS1234567891": {
-                    "currency": "USD",
-                    "volume": 100000,
-                    "price": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "USD",
-                        "base_currency_conversion_rate": 0.75,
-                        "value": 101.50
+                "position_valuation": {
+                    "XS1234567890": {
+                        "currency": "AUD",
+                        "volume": 100000,
+                        "price": {
+                            "date": datetime.datetime(2000,1,1),
+                            "per_original_face_value": 100,
+                            "currency": "AUD",
+                            "base_currency_conversion_rate": 1.00,
+                            "value": 101.50
+                        },
+                        "valuation": 101500.00
                     },
-                    "valuation": 101500.00
+                    "XS1234567891": {
+                        "currency": "USD",
+                        "volume": 100000,
+                        "price": {
+                            "date": datetime.datetime(2000,1,1),
+                            "per_original_face_value": 100,
+                            "currency": "USD",
+                            "base_currency_conversion_rate": 0.75,
+                            "value": 101.50
+                        },
+                        "valuation": 101500.00
+                    }
                 }
             }
         }
         
         end_valuation = {
-            "valuation_date": "2001-01-01",
-            "total_valuation": {
-                "AUD": 101500,
-                "USD": 101500
-            },
-            "position_valuation": {
-                "XS1234567890": {
-                    "currency": "AUD",
-                    "volume": 100000,
-                    "price": {
-                        "date": datetime.datetime(2001,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "AUD",
-                        "base_currency_conversion_rate": 1.00,
-                        "value": 101.50
-                    },
-                    "valuation": 101500.00
+            "date": "2001-01-01",
+            "valuation": {
+                "total_valuation": {
+                    "AUD": 101500,
+                    "USD": 101500
                 },
-                "XS1234567891": {
-                    "currency": "USD",
-                    "volume": 100000,
-                    "price": {
-                        "date": datetime.datetime(2001,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "USD",
-                        "base_currency_conversion_rate": 0.75,
-                        "value": 101.50
+                "position_valuation": {
+                    "XS1234567890": {
+                        "currency": "AUD",
+                        "volume": 100000,
+                        "price": {
+                            "date": datetime.datetime(2001,1,1),
+                            "per_original_face_value": 100,
+                            "currency": "AUD",
+                            "base_currency_conversion_rate": 1.00,
+                            "value": 101.50
+                        },
+                        "valuation": 101500.00
                     },
-                    "valuation": 101500.00
+                    "XS1234567891": {
+                        "currency": "USD",
+                        "volume": 100000,
+                        "price": {
+                            "date": datetime.datetime(2001,1,1),
+                            "per_original_face_value": 100,
+                            "currency": "USD",
+                            "base_currency_conversion_rate": 0.75,
+                            "value": 101.50
+                        },
+                        "valuation": 101500.00
+                    }
                 }
             }
         }
@@ -1167,70 +1164,74 @@ class TestGetPortfolioValuationDifference(unittest.TestCase):
         
     def test_negative_change(self):
         start_valuation = {
-            "valuation_date": "2000-01-01",
-            "total_valuation": {
-                "AUD": 101500,
-                "USD": 100000
-            },
-            "position_valuation": {
-                "XS1234567890": {
-                    "currency": "AUD",
-                    "volume": 100000,
-                    "price": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "AUD",
-                        "base_currency_conversion_rate": 1.00,
-                        "value": 101.50
-                    },
-                    "valuation": 101500.00
+            "date": "2000-01-01",
+            "valuation": {
+                "total_valuation": {
+                    "AUD": 101500,
+                    "USD": 100000
                 },
-                "XS1234567891": {
-                    "currency": "USD",
-                    "volume": 100000,
-                    "price": {
-                        "date": datetime.datetime(2000,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "USD",
-                        "base_currency_conversion_rate": 0.75,
-                        "value": 100.50
+                "position_valuation": {
+                    "XS1234567890": {
+                        "currency": "AUD",
+                        "volume": 100000,
+                        "price": {
+                            "date": datetime.datetime(2000,1,1),
+                            "per_original_face_value": 100,
+                            "currency": "AUD",
+                            "base_currency_conversion_rate": 1.00,
+                            "value": 101.50
+                        },
+                        "valuation": 101500.00
                     },
-                    "valuation": 100000.00
-                }
+                    "XS1234567891": {
+                        "currency": "USD",
+                        "volume": 100000,
+                        "price": {
+                            "date": datetime.datetime(2000,1,1),
+                            "per_original_face_value": 100,
+                            "currency": "USD",
+                            "base_currency_conversion_rate": 0.75,
+                            "value": 100.50
+                        },
+                        "valuation": 100000.00
+                    }
+                }    
             }
         }
         
         end_valuation = {
-            "valuation_date": "2001-01-01",
-            "total_valuation": {
-                "AUD": 101500,
-                "USD": 50000
-            },
-            "position_valuation": {
-                "XS1234567890": {
-                    "currency": "AUD",
-                    "volume": 100000,
-                    "price": {
-                        "date": datetime.datetime(2001,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "AUD",
-                        "base_currency_conversion_rate": 1.00,
-                        "value": 101.50
-                    },
-                    "valuation": 101500.00
+            "date": "2001-01-01",
+            "valuation": {
+                "total_valuation": {
+                    "AUD": 101500,
+                    "USD": 50000
                 },
-                "XS1234567891": {
-                    "currency": "USD",
-                    "volume": 50000,
-                    "price": {
-                        "date": datetime.datetime(2001,1,1),
-                        "per_original_face_value": 100,
-                        "currency": "USD",
-                        "base_currency_conversion_rate": 0.75,
-                        "value": 100.00
+                "position_valuation": {
+                    "XS1234567890": {
+                        "currency": "AUD",
+                        "volume": 100000,
+                        "price": {
+                            "date": datetime.datetime(2001,1,1),
+                            "per_original_face_value": 100,
+                            "currency": "AUD",
+                            "base_currency_conversion_rate": 1.00,
+                            "value": 101.50
+                        },
+                        "valuation": 101500.00
                     },
-                    "valuation": 50000.00
-                }
+                    "XS1234567891": {
+                        "currency": "USD",
+                        "volume": 50000,
+                        "price": {
+                            "date": datetime.datetime(2001,1,1),
+                            "per_original_face_value": 100,
+                            "currency": "USD",
+                            "base_currency_conversion_rate": 0.75,
+                            "value": 100.00
+                        },
+                        "valuation": 50000.00
+                    }
+                }    
             }
         }
         
@@ -1240,10 +1241,7 @@ class TestGetPortfolioValuationDifference(unittest.TestCase):
                 "USD": -50000
             }
         }
-        
-                
+            
         result = get_portfolio_valuation_difference(start_valuation, end_valuation)
         
         self.assertEqual(result, expected)
-            
-        

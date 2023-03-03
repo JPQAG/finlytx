@@ -415,8 +415,7 @@ class PortfolioFutureCashflowsTest(unittest.TestCase):
         result = get_portfolio_future_cashflows(portfolio_holdings, security_lifetime_cashflow_object)
     
         self.assertDictEqual(result, expected_result)
-        
-    
+
 class PortfolioHistoricalCashflowsTest(unittest.TestCase):
         
     def test_portfolio_holdings_not_dict(self):
@@ -1083,6 +1082,10 @@ class PerformancePeriodCashflowIncomeTest(unittest.TestCase):
     
     def test_get_performance_period_cashflow_income(self):
         
+        security_currency_map = {
+            "XS12345678901": "AUD",
+            "XS12345678902": "USD"
+        }
         cashflow_income = {
             "2000-02-01": {
                 "XS12345678901" : {
@@ -1154,12 +1157,11 @@ class PerformancePeriodCashflowIncomeTest(unittest.TestCase):
         start_date = datetime.datetime(2000, 2, 1)
         end_date = datetime.datetime(2000, 3, 2)
         
-        expected = (0.05 / 12 * 100000) + (0.05 / 12  *100000) + (0.05 / 12  * 100000)
+        expected = {
+            "AUD": (0.05 / 12 * 100000) + (0.05 / 12  * 100000),
+            "USD": (0.05 / 12  * 100000)
+        }
         
-        result = get_performance_period_cashflow_income(start_date, end_date, cashflow_income)
+        result = get_performance_period_cashflow_income(start_date, end_date, cashflow_income, security_currency_map)
         
         self.assertEqual(result, expected)
-        
-        
-        
-        

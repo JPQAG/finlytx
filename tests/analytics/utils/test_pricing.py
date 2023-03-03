@@ -17,7 +17,8 @@ from src.analytics.utils.pricing import (
     get_pricing_history,
     get_period_total_return,
     get_annualised_return,
-    get_unique_currencies
+    get_unique_currencies,
+    get_security_currency_mapping
 )
 
 class AccruedInterestTestCase(unittest.TestCase):
@@ -280,5 +281,53 @@ class GetCurrenciesFromPricesTestCase(unittest.TestCase):
         result = get_unique_currencies(prices)
         
         self.assertEqual(sorted(expected), sorted(result))
+        
+class GetSecurityCurrencyMappingTestCase(unittest.TestCase):
+    
+    def test_get_security_currency_mapping(self):
+        
+        prices = {
+            "XS1234567890": {
+                "2000-01-01": {
+                    "date": datetime(2000,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 99.50
+                },
+                "2001-01-01": {
+                    "date": datetime(2001,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "AUD",
+                    "base_currency_conversion_rate": 1.00,
+                    "value": 101.50
+                },
+            },
+            "XS1234567891": {
+                "2000-01-01": {
+                    "date": datetime(2000,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "USD",
+                    "base_currency_conversion_rate": 0.75,
+                    "value": 99.50
+                },
+                "2001-01-01": {
+                    "date": datetime(2001,1,1),
+                    "per_original_face_value": 100,
+                    "currency": "USD",
+                    "base_currency_conversion_rate": 0.75,
+                    "value": 101.50
+                }
+            }
+        }
+        
+        expected = {
+            "XS1234567890": "AUD",
+            "XS1234567891": "USD"
+        }
+        
+        result = get_security_currency_mapping(prices)
+        
+        self.assertEqual(expected, result)
         
         

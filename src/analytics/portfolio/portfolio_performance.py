@@ -1,12 +1,13 @@
 import datetime
-from typing import Dict
+from typing import Dict, List
 
 from src.analytics.utils.date_time import (
     _default_date
 )
 
 from src.analytics.portfolio.portfolio_holdings import (
-    get_invested_capital_delta   
+    get_invested_capital_delta,
+    get_holdings_by_date_and_currency
 )
 
 from src.analytics.portfolio.portfolio_cashflows import (
@@ -19,12 +20,13 @@ from src.analytics.portfolio.portfolio_valuation import (
 )
 
 from src.analytics.utils.pricing import (
-    get_unique_currencies
+    get_unique_currencies,
+    get_security_currency_mapping
 )
 
 def get_portfolio_performance_index(
     pricing_date: datetime.datetime,
-    trades: Dict,
+    trades: List,
     holdings: Dict,
     cashflows: Dict,
     prices: Dict,
@@ -44,7 +46,7 @@ def get_portfolio_performance_index(
     
     """
     assert isinstance(pricing_date, datetime.datetime), "pricing_date input must be of type datetime.datetime."
-    assert isinstance(trades, dict), "trades input must be of type dict."
+    assert isinstance(trades, List), "trades input must be of type list."
     assert isinstance(holdings, dict), "holdings input must be of type dict."
     assert isinstance(cashflows, dict), "cashflows input must be of type dict."
     assert isinstance(prices, dict), "prices input must be of type dict."
@@ -52,70 +54,94 @@ def get_portfolio_performance_index(
     assert len(trades) > 0, "trades input must not be empty."
     assert len(cashflows) > 0, "cashflows input must not be empty."
     assert len(prices) > 0, "prices input must not be empty."
-    
+        
     starting_index_value = 100
     holdings_dates = list(holdings.keys())
     unique_currencies = get_unique_currencies(prices)
-    performance_index = {
-        "start_date": holdings_dates[0],
-        "end_date": pricing_date,
-        "index": {}
-    }
+    performance_index = {"start_date": holdings_dates[0],"end_date": pricing_date.strftime('%Y-%m-%d'),"index": {}}
     portfolio_valuation_index = get_portfolio_valuation_index(
         holdings,
         prices
     )
+    security_currency_map = get_security_currency_mapping(prices)
+    holdings_by_date_and_currency = get_holdings_by_date_and_currency(holdings, security_currency_map)
     
     
     for i in range(0, len(holdings_dates) - 1):
         starting_date = holdings_dates[i]
         ending_date = holdings_dates[i + 1]
-        
-        if i == 0:
-            performance_index['index'][holdings_dates[i]] = {
-                "date": holdings_dates[i],
-                "index_values": {},
-                "performance_since_last": {}
+
+        performance_index['index'][holdings_dates[i]] = {
+            "date": holdings_dates[i],
+            "index_values": {},
+            "performance_since_last": {
+                "valuation_change": {},
+                "cashflow_income": {},
+                "invested_capital_delta": {}
             }
-            
+        }
+        
+        if i == 0:    
             for currency in unique_currencies:
-                performance_index['index'][holdings_dates[i]]['index_values'][currency] = starting_index_value
-                
+                performance_index['index'][holdings_dates[i]]['index_values'][currency] = starting_index_value        
             continue
         
-        valuation_at_start = portfolio_valuation_index[starting_date]
-        valuation_at_end = portfolio_valuation_index[ending_date]
         index_at_start = performance_index['index'][holdings_dates[i - 1]]['index_values']
         
-        invested_capital_delta = get_invested_capital_delta(
+        valuation_change_by_currency = {}
+        period_performance = get_portfolio_performance(
+            pricing_date,
+            portfolio_valuation_index[starting_date],
+            portfolio_valuation_index[ending_date],
+            prices,
+            cashflows,
+            holdings
+        )
+        for currency in unique_currencies:
+            valuation_change_by_currency[currency] = period_performance['investment_value_change']['valuation_change'][currency]
+        
+        
+        invested_capital_delta_by_currency = {}
+        invested_capital_delta_by_security = get_invested_capital_delta(
             _default_date(starting_date) + datetime.timedelta(days=1),
             _default_date(ending_date),
             trades
         )
-        
-        period_performance = get_portfolio_performance(
-            pricing_date=pricing_date,
-            start_valuation=valuation_at_start,
-            end_valuation=valuation_at_end,
-            prices=prices,
-            cashflows=cashflows,
-            holdings=holdings
-        )
-        
-        income = get_performance_period_cashflow_income(
-            starting_date,
-            ending_date,
-            period_performance['investment_value_change']['cashflow_income']
-        )
-        
         for currency in unique_currencies:
-            valuation_change = period_performance['investment_value_change']['valuation_change'][currency]
+            securities_in_currency = [security for security in security_currency_map if security_currency_map[security] == currency]
+            invested_capital_delta_by_currency[currency] = sum([invested_capital_delta_by_security['invested_capital_delta'][security]['volume'] for security in securities_in_currency])       
         
-        # performance_index['index'][holdings_dates[i]]['index_values'][currency] = 
-        
-        #INCOME CURRENCY NEEDS TO BE SPLIT OUT?
-        
-
+        income_by_currency = get_performance_period_cashflow_income(
+            _default_date(starting_date),
+            _default_date(ending_date),
+            period_performance['investment_value_change']['cashflow_income'],
+            security_currency_map
+        )
+                
+        for currency in unique_currencies:
+            if holdings_by_date_and_currency[starting_date][currency] == 0:
+                performance_index['index'][holdings_dates[i]]['index_values'][currency] = performance_index['index'][holdings_dates[i - 1]]['index_values'][currency]
+                performance_index['index'][holdings_dates[i]]['performance_since_last']['valuation_change'][currency] = 0
+                performance_index['index'][holdings_dates[i]]['performance_since_last']['cashflow_income'][currency] = 0
+                performance_index['index'][holdings_dates[i]]['performance_since_last']['invested_capital_delta'][currency] = 0
+            else:    
+                income = income_by_currency[currency] if currency in income_by_currency.keys() else 0
+                valuation_change = valuation_change_by_currency[currency] if currency in valuation_change_by_currency.keys() else 0
+                invested_capital_change = invested_capital_delta_by_currency[currency] if currency in invested_capital_delta_by_currency.keys() else 0
+                
+                starting_valuation = portfolio_valuation_index[starting_date]["valuation"]["total_valuation"][currency]
+                
+                    
+                total_investment_change = valuation_change + income - invested_capital_change
+                period_performance_percentage = total_investment_change / starting_valuation
+                ending_index_value = index_at_start[currency] * (1 + period_performance_percentage)            
+                
+                performance_index['index'][holdings_dates[i]]['index_values'][currency] = ending_index_value
+                performance_index['index'][holdings_dates[i]]['performance_since_last']['valuation_change'][currency] = valuation_change
+                performance_index['index'][holdings_dates[i]]['performance_since_last']['cashflow_income'][currency] = income
+                performance_index['index'][holdings_dates[i]]['performance_since_last']['invested_capital_delta'][currency] = invested_capital_change
+                
+    return performance_index
           
 def get_portfolio_performance(
     pricing_date: datetime.datetime,
@@ -168,8 +194,8 @@ def get_portfolio_performance(
     
     portfolio_performance = {
         'pricing_date': pricing_date.strftime("%Y-%m-%d"),
-        'start_date': start_valuation['valuation_date'],
-        'end_date': end_valuation['valuation_date']
+        'start_date': start_valuation['date'].strftime("%Y-%m-%d"),
+        'end_date': end_valuation['date'].strftime("%Y-%m-%d"),
     }
     
     portfolio_performance['investment_value_change'] = {}
@@ -211,10 +237,10 @@ def get_portfolio_valuation_difference(
     
     portfolio_valuation_difference = {}
     
-    start_date = start_valuation['valuation_date']
-    start_val = start_valuation.get('total_valuation', {})
-    end_date = end_valuation['valuation_date']
-    end_val = end_valuation.get('total_valuation', {})
+    start_date = start_valuation['date']
+    start_val = start_valuation['valuation'].get('total_valuation', {})
+    end_date = end_valuation['date']
+    end_val = end_valuation['valuation'].get('total_valuation', {})
     currencies = list(set(start_val.keys()) | set(end_val.keys()))
         
     portfolio_valuation_difference = {

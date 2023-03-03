@@ -5,6 +5,10 @@ from src.analytics.utils.date_time import (
     _default_date
 )
 
+from src.analytics.utils.pricing import (
+    get_security_currency_mapping
+)
+
 import datetime
 
 def get_portfolio_valuation_index(
@@ -29,17 +33,20 @@ def get_portfolio_valuation_index(
     assert isinstance(portfolio_holdings_index, Dict), "portfolio_holdings_index input must be of type dict."
     assert isinstance(price_history_index, Dict), "price_history_index input must be of type dict."
     
+    security_currency_mapping = get_security_currency_mapping(price_history_index)
+    
     portfolio_valuation_index = {}
     
     for date, holdings in portfolio_holdings_index.items():
-        
+            
         prices_on_date_dict = _get_prices_on_date(_default_date(date), price_history_index)
         holdings_on_date_dict = holdings["holdings"]
         
         portfolio_valuation_index[date] = get_portfolio_valuation(
             _default_date(date),
             holdings_on_date_dict,
-            prices_on_date_dict
+            prices_on_date_dict,
+            security_currency_mapping
         )
     
     return portfolio_valuation_index
@@ -47,7 +54,8 @@ def get_portfolio_valuation_index(
 def get_portfolio_valuation(
     pricing_date: datetime.datetime,
     holdings: Dict,
-    pricing: Dict
+    pricing: Dict,
+    security_currency_mapping: Dict = {}
 ) -> Dict:
     assert isinstance(pricing_date, datetime.datetime), "pricing_date input must be of type datetime.datetime."
     assert isinstance(holdings, Dict), "holdings input must be of type dict."
@@ -72,6 +80,7 @@ def get_portfolio_valuation(
     
     for security, holding in holdings.items():
         pricing_dict = pricing[security] if (security in pricing) else no_price_available
+        pricing_dict['currency'] = security_currency_mapping[security] if (security in security_currency_mapping) else pricing_dict['currency']
         
         position_valuation = get_position_valuation(pricing_date, holding, pricing_dict)
         
@@ -104,6 +113,9 @@ def get_position_valuation(
     
     return holding_valuation
 
+
+
+
 def _get_prices_on_date(
     pricing_date: datetime.datetime,
     prices_history: Dict
@@ -129,3 +141,6 @@ def _get_prices_on_date(
         prices_on_date[security] = prices[max(price_dates)] if price_dates else {}
                                 
     return prices_on_date
+
+
+

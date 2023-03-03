@@ -165,3 +165,13 @@ def get_unique_currencies(
     currencies = [date_info["currency"] for security in prices.values() for date_info in security.values()]
         
     return list(set(currencies))
+
+def get_security_currency_mapping(
+    prices: Dict
+) -> Dict:
+    currency_mapping = {}
+    for security, date_info in prices.items():
+        currency = date_info[list(date_info.keys())[0]]["currency"]
+        currency_mapping[security] = currency
+        
+    return currency_mapping

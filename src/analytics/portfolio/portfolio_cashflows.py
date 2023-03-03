@@ -186,7 +186,8 @@ def _get_cashflow_given_holdings(
 def get_performance_period_cashflow_income(
     start_date: datetime.datetime,
     end_date: datetime.datetime,
-    cashflow_income: Dict
+    cashflow_income: Dict,
+    security_currency_map: Dict
 ) -> float:
     """Calculates the cashflow income for a given performance period.
     
@@ -203,11 +204,14 @@ def get_performance_period_cashflow_income(
     assert isinstance(cashflow_income, Dict), "cashflow_income input must be of type Dict."
     assert cashflow_income, "cashflow_income input must not be empty."
     
-    performance_period_cashflow_income = 0.00
+    performance_period_cashflow_income = {}
     
     for date, security_cashflows in cashflow_income.items():
         if start_date <= _default_date(date) <= end_date:
             for isin, cashflow in security_cashflows.items():
-                performance_period_cashflow_income += cashflow['cashflow']['total']
+                currency = security_currency_map[isin]
+                performance_period_cashflow_income[currency] = performance_period_cashflow_income.get(currency, 0.00)
+                performance_period_cashflow_income[currency] += cashflow['cashflow']['total']
     
     return performance_period_cashflow_income
+

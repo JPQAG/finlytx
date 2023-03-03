@@ -172,8 +172,29 @@ def get_invested_capital_delta(
 def get_unique_securities_from_trades(
     trades: List
 ) -> List:
-    assert isinstance(trades, List), "Trades must be a dictionary."
+    assert isinstance(trades, List), "Trades must be a list."
     assert len(trades) > 0, "Trades must not be empty."
      
     return list(set([trade['isin'] for trade in trades]))    
+
+def get_holdings_by_date_and_currency(
+    holdings: Dict,
+    security_currency_map: Dict
+) -> Dict:
+    assert isinstance(holdings, dict), "Holdings must be a dictionary."
+    assert len(holdings) > 0, "Holdings must not be empty."
+    assert isinstance(security_currency_map, dict), "Security currency map must be a dictionary."
     
+    holdings_securities = get_unique_securities_from_holdings(holdings)
+    assert all([security in security_currency_map.keys() for security in holdings_securities]), "Security currency map must contain all securities in holdings."
+    
+    holdings_by_date_and_currency = {}
+    
+    for date, holdings_on_date in holdings.items():
+        holdings_by_date_and_currency[date] = {}
+        
+        for security, holding in holdings_on_date['holdings'].items():
+            currency = security_currency_map[security]
+            holdings_by_date_and_currency[date][currency] = holdings_by_date_and_currency[date].get(currency, 0) + holding['volume']
+    
+    return holdings_by_date_and_currency

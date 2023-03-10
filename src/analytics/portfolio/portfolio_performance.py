@@ -68,9 +68,6 @@ def get_portfolio_performance_index(
     
     
     for i in range(0, len(holdings_dates) - 1):
-        starting_date = holdings_dates[i]
-        ending_date = holdings_dates[i + 1]
-
         performance_index['index'][holdings_dates[i]] = {
             "date": holdings_dates[i],
             "index_values": {},
@@ -80,11 +77,14 @@ def get_portfolio_performance_index(
                 "invested_capital_delta": {}
             }
         }
-        
+
         if i == 0:    
             for currency in unique_currencies:
                 performance_index['index'][holdings_dates[i]]['index_values'][currency] = starting_index_value        
             continue
+        
+        starting_date = holdings_dates[i - 1]
+        ending_date = holdings_dates[i]
         
         index_at_start = performance_index['index'][holdings_dates[i - 1]]['index_values']
         
@@ -119,7 +119,7 @@ def get_portfolio_performance_index(
         )
                 
         for currency in unique_currencies:
-            if holdings_by_date_and_currency[starting_date][currency] == 0:
+            if currency not in holdings_by_date_and_currency[starting_date].keys() or holdings_by_date_and_currency[starting_date][currency] == 0:
                 performance_index['index'][holdings_dates[i]]['index_values'][currency] = performance_index['index'][holdings_dates[i - 1]]['index_values'][currency]
                 performance_index['index'][holdings_dates[i]]['performance_since_last']['valuation_change'][currency] = 0
                 performance_index['index'][holdings_dates[i]]['performance_since_last']['cashflow_income'][currency] = 0

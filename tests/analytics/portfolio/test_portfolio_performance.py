@@ -1,5 +1,6 @@
 import unittest
 import datetime
+import json
 
 from ..helper.test_utils import (
     test_raises
@@ -347,6 +348,12 @@ class PortfolioPerformanceIndexTestCase(unittest.TestCase):
             cashflows,
             prices,
         )
+        
+        with open("result.json", "w") as f:
+            f.write(json.dumps(result, indent=4))
+        
+        with open("expected.json", "w") as f:
+            f.write(json.dumps(expected, indent=4))
         
         self.assertEqual(result, expected)
 

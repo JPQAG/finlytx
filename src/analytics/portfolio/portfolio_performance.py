@@ -43,6 +43,8 @@ def get_portfolio_performance_index(
     * get portfolio performance between each 
     * Include cashflows between each holdings date.
     
+    * If we have an index value on a trade date there could be a negative/positive change in index value because the trade was higher/lower than the market price.
+    
     
     """
     assert isinstance(pricing_date, datetime.datetime), "pricing_date input must be of type datetime.datetime."
@@ -67,7 +69,7 @@ def get_portfolio_performance_index(
     holdings_by_date_and_currency = get_holdings_by_date_and_currency(holdings, security_currency_map)
     
     
-    for i in range(0, len(holdings_dates) - 1):
+    for i in range(0, len(holdings_dates)):
         performance_index['index'][holdings_dates[i]] = {
             "date": holdings_dates[i],
             "index_values": {},
@@ -120,17 +122,28 @@ def get_portfolio_performance_index(
                 
         for currency in unique_currencies:
             if currency not in holdings_by_date_and_currency[starting_date].keys() or holdings_by_date_and_currency[starting_date][currency] == 0:
-                performance_index['index'][holdings_dates[i]]['index_values'][currency] = performance_index['index'][holdings_dates[i - 1]]['index_values'][currency]
-                performance_index['index'][holdings_dates[i]]['performance_since_last']['valuation_change'][currency] = 0
+                
+                income = income_by_currency[currency] if currency in income_by_currency.keys() else 0
+                valuation_change = valuation_change_by_currency[currency] if currency in valuation_change_by_currency.keys() else 0
+                invested_capital_change = invested_capital_delta_by_currency[currency] if currency in invested_capital_delta_by_currency.keys() else 0
+                
+                starting_valuation = 0
+                    
+                total_investment_change = valuation_change + income - invested_capital_change
+                period_performance_percentage = total_investment_change / invested_capital_change if invested_capital_change != 0 else 0
+                ending_index_value = index_at_start[currency] * (1 + period_performance_percentage)
+                
+                performance_index['index'][holdings_dates[i]]['performance_since_last']['valuation_change'][currency] = valuation_change_by_currency[currency] if currency in valuation_change_by_currency.keys() else 0
                 performance_index['index'][holdings_dates[i]]['performance_since_last']['cashflow_income'][currency] = 0
-                performance_index['index'][holdings_dates[i]]['performance_since_last']['invested_capital_delta'][currency] = 0
-            else:    
+                performance_index['index'][holdings_dates[i]]['performance_since_last']['invested_capital_delta'][currency] = invested_capital_delta_by_currency[currency] if currency in invested_capital_delta_by_currency.keys() else 0
+                
+                performance_index['index'][holdings_dates[i]]['index_values'][currency] = ending_index_value
+            else:
                 income = income_by_currency[currency] if currency in income_by_currency.keys() else 0
                 valuation_change = valuation_change_by_currency[currency] if currency in valuation_change_by_currency.keys() else 0
                 invested_capital_change = invested_capital_delta_by_currency[currency] if currency in invested_capital_delta_by_currency.keys() else 0
                 
                 starting_valuation = portfolio_valuation_index[starting_date]["valuation"]["total_valuation"][currency]
-                
                     
                 total_investment_change = valuation_change + income - invested_capital_change
                 period_performance_percentage = total_investment_change / starting_valuation
@@ -140,7 +153,7 @@ def get_portfolio_performance_index(
                 performance_index['index'][holdings_dates[i]]['performance_since_last']['valuation_change'][currency] = valuation_change
                 performance_index['index'][holdings_dates[i]]['performance_since_last']['cashflow_income'][currency] = income
                 performance_index['index'][holdings_dates[i]]['performance_since_last']['invested_capital_delta'][currency] = invested_capital_change
-                
+                    
     return performance_index
           
 def get_portfolio_performance(

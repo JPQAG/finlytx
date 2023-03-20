@@ -1,5 +1,6 @@
 import datetime
 from typing import Dict, List, Tuple
+import copy
 
 from src.analytics.utils.date_time import (
     _default_date
@@ -167,6 +168,8 @@ def _get_cashflow_given_holdings(
     assert all(isinstance(key_tuple, Tuple) and len(key_tuple) == 2 for key_tuple in key_mapping), "key_mapping input must be a list of tuples, each tuple containing two strings."
     assert cashflow, "cashflow input must not be empty."
     assert holdings, "holdings input must not be empty."
+    
+    cashflow = copy.deepcopy(cashflow)
         
     security_holdings_volume = holdings['holdings'][security_id]['volume']
     

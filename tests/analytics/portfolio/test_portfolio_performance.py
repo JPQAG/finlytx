@@ -269,7 +269,7 @@ class PortfolioPerformanceIndexTestCase(unittest.TestCase):
                     "per_original_face_value": 100,
                     "currency": "AUD",
                     "base_currency_conversion_rate": 1.00,
-                    "value": 99.50
+                    "value": 99.50  
                 },
                 "2001-01-01": {
                     "date": datetime.datetime(2001,1,1),
@@ -301,42 +301,80 @@ class PortfolioPerformanceIndexTestCase(unittest.TestCase):
             "start_date": "2000-01-03",
             "end_date": "2001-01-01",
             "index": {
-                "2000-01-03" : {
+                "2000-01-03": {
                     "date": "2000-01-03",
                     "index_values": {
-                        "AUD": 100,
-                        "USD": 100
+                        "USD": 100,
+                        "AUD": 100
                     },
-                    "performance_since_last": {}
+                    "performance_since_last": {
+                        "valuation_change": {},
+                        "cashflow_income": {},
+                        "invested_capital_delta": {}
+                    }
                 },
-                "2000-02-03" : {
+                "2000-02-03": {
                     "date": "2000-02-03",
                     "index_values": {
-                        "AUD": 100,
-                        "USD": 100
+                        "USD": 99.00497512437812,
+                        "AUD": 100.41876046901173
                     },
                     "performance_since_last": {
                         "valuation_change": {
-                            "AUD": 0.0,
-                            "USD": 0.0
+                            "USD": 99500.0,
+                            "AUD": 0.0
+                        },
+                        "cashflow_income": {
+                            "USD": 0,
+                            "AUD": 416.6666666666667
+                        },
+                        "invested_capital_delta": {
+                            "USD": 100500.0,
+                            "AUD": 0
                         }
                     }
                 },
-                "2000-04-02" : {
+                "2000-04-02": {
                     "date": "2000-04-02",
                     "index_values": {
-                        "AUD": 100,
-                        "USD": 100
+                        "USD": 101.4096185737977,
+                        "AUD": 100.83927454132753
                     },
-                    "performance_since_last": {}
+                    "performance_since_last": {
+                        "valuation_change": {
+                            "USD": -99500.0,
+                            "AUD": 0.0
+                        },
+                        "cashflow_income": {
+                            "USD": 416.6666666666667,
+                            "AUD": 416.6666666666667
+                        },
+                        "invested_capital_delta": {
+                            "USD": -101500.0,
+                            "AUD": 0
+                        }
+                    }
                 },
-                "2000-07-02" : {
+                "2000-07-02": {
                     "date": "2000-07-02",
                     "index_values": {
-                        "AUD": 100,
-                        "USD": 100
+                        "USD": 101.4096185737977,
+                        "AUD": 101.34600456414826
                     },
-                    "performance_since_last": {}
+                    "performance_since_last": {
+                        "valuation_change": {
+                            "USD": 0.0,
+                            "AUD": -49750.0
+                        },
+                        "cashflow_income": {
+                            "USD": 0,
+                            "AUD": 0
+                        },
+                        "invested_capital_delta": {
+                            "USD": 0,
+                            "AUD": -50250.0
+                        }
+                    }
                 }
             }
         }
@@ -351,9 +389,6 @@ class PortfolioPerformanceIndexTestCase(unittest.TestCase):
         
         with open("result.json", "w") as f:
             f.write(json.dumps(result, indent=4))
-        
-        with open("expected.json", "w") as f:
-            f.write(json.dumps(expected, indent=4))
         
         self.assertEqual(result, expected)
 

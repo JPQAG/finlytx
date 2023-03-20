@@ -25,6 +25,8 @@ def get_holdings_from_trades(
         else:
             holdings_count[isin] = {}
             holdings_count[isin]['volume'] = net_volume
+            
+        
         
         holdings_dict[settlement_date] = {
             "date": settlement_date,

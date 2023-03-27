@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
-from src.analytics.utils.regression.calibrate import (
+from finx.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
+from finx.analytics.utils.regression.calibrate import (
     betas_nss_ols, 
     errorfn_nss_ols,
     calibrate_nss_ols

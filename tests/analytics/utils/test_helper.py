@@ -1,7 +1,7 @@
 import unittest
 import datetime
 
-from src.analytics.utils.helper import (
+from finx.analytics.utils.helper import (
     calculate_years_between_dates,
     convert_date_series_to_years,
     get_dict_from_list

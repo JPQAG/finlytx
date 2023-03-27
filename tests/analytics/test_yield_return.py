@@ -1,7 +1,6 @@
 import unittest
 
-from src.analytics.yield_return import YieldReturn
-
+from finx.analytics.yield_return import YieldReturn
 
 class TestYieldReturn(unittest.TestCase):
     def test_discounted_cash_flow(self):

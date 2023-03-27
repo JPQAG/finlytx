@@ -2,10 +2,10 @@ import datetime
 
 from typing import Dict, List
 
-from src.analytics.utils.financial import discount_rate_of_cashflows
-from src.analytics.utils.cashflow import trim_cashflows_after_workout
-from src.analytics.utils.curve import construct_ns_curve, construct_nss_curve
-from src.analytics.utils.helper import calculate_years_between_dates
+from finx.analytics.utils.financial import discount_rate_of_cashflows
+from finx.analytics.utils.cashflow import trim_cashflows_after_workout
+from finx.analytics.utils.curve import construct_ns_curve, construct_nss_curve
+from finx.analytics.utils.helper import calculate_years_between_dates
 
 def yield_to_workout(
     pricing_date: datetime.datetime,

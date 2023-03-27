@@ -1,6 +1,6 @@
 import unittest
 
-from src.analytics.portfolio.portfolio_holdings import (
+from finx.analytics.portfolio.portfolio_holdings import (
     get_holdings_from_trades
 )
 

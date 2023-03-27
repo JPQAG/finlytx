@@ -1,7 +1,7 @@
 import datetime
 import unittest
 
-from src.analytics.portfolio.portfolio_valuation import (
+from finx.analytics.portfolio.portfolio_valuation import (
     get_portfolio_valuation_index,
     get_position_valuation,
     get_portfolio_valuation,

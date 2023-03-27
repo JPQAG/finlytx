@@ -1,7 +1,7 @@
 import datetime
 from typing import Dict, List, Tuple
 
-from src.analytics.utils.date_time import (
+from finx.analytics.utils.date_time import (
     _default_date
 )
 

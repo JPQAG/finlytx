@@ -2,10 +2,10 @@ import unittest
 import datetime
 import numpy as np
 
-from src.analytics.utils.regression.ns import NelsonSiegelCurve
-from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
+from finx.analytics.utils.regression.ns import NelsonSiegelCurve
+from finx.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
 
-from src.analytics.utils.curve import (
+from finx.analytics.utils.curve import (
     bootstrap_curve,
     construct_ns_curve,
     ns_curve_output,
@@ -24,7 +24,7 @@ from ..helper.testConstants import (
     MOCK_BENCHMARK_CURVE_CLEAN_TENOR
 )
 
-from src.analytics.utils.regression.calibrate import calibrate_ns_ols, calibrate_nss_ols
+from finx.analytics.utils.regression.calibrate import calibrate_ns_ols, calibrate_nss_ols
 
 class CurveTestCase(unittest.TestCase):
     def test_construct_ns_curve(self):

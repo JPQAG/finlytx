@@ -1,7 +1,7 @@
 import unittest
 import datetime
 
-from src.analytics.security.security_yield_return import (
+from finx.analytics.security.security_yield_return import (
     yield_to_workout, 
     current_yield,
     spread_to_benchmark

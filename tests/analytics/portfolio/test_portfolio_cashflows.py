@@ -1,10 +1,10 @@
 import unittest
 
-from src.analytics.utils.date_time import (
+from finx.analytics.utils.date_time import (
     _default_date
 )
 
-from src.analytics.portfolio.portfolio_cashflows import (
+from finx.analytics.portfolio.portfolio_cashflows import (
     get_portfolio_future_cashflows,
     get_portfolio_historical_cashflows,
     _get_cashflow_given_holdings

@@ -4,7 +4,7 @@ import unittest
 
 import numpy as np
 
-from src.analytics.utils.regression.ns import NelsonSiegelCurve
+from finx.analytics.utils.regression.ns import NelsonSiegelCurve
 
 
 class TestNelsonSiegelCurveImplementation(unittest.TestCase):

@@ -2,7 +2,7 @@ import datetime
 from typing import Any, Dict, List
 import pandas as pd
 
-from src.analytics.utils.date_time import(
+from finx.analytics.utils.date_time import(
     days_between_dates,
     _default_date
 )

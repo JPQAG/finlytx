@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime, time
 import pandas as pd
 
-from src.analytics.utils.date_time import (
+from finx.analytics.utils.date_time import (
     _annual_range,
     _default_date,
     _generate_pd_date_range,
@@ -16,7 +16,7 @@ from src.analytics.utils.date_time import (
     get_days_before_date,
     get_record_date
 )
-from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
+from finx.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
 
 
 class DateTimeTestCase(unittest.TestCase):

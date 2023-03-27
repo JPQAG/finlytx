@@ -1,6 +1,6 @@
 import unittest
 
-from src.analytics.security.security_return import (
+from finx.analytics.security.security_return import (
     get_period_return,
     get_return_history
 )

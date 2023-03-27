@@ -1,7 +1,7 @@
 import pandas as pd
 from pandas.tseries.offsets import DateOffset
-from src.analytics.utils.regression.ns import NelsonSiegelCurve
-from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
+from finx.analytics.utils.regression.ns import NelsonSiegelCurve
+from finx.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
 
 TIMESERIES_TIME_PERIODS = {
     "A": {

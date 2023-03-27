@@ -5,7 +5,7 @@ from typing import Any, List
 import pandas as pd
 from pandas.tseries.offsets import DateOffset
 
-from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
+from finx.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
 
 def get_days_before_date(
     start_date: datetime.datetime,

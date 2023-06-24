@@ -1,23 +1,17 @@
-import math
-from typing import Dict, List
-import numpy as np
 import datetime
-from src.analytics.utils.financial import implied_forward_rate
-from src.analytics.utils.lookup import (
-    TIMESERIES_TIME_PERIODS, 
-    FRACTION_OF_YEAR_TO_PERIOD_STRING,
-    CURVE_OPTIONS
-)
+import math
+import numpy as np
 
-from src.analytics.utils.regression.ns import NelsonSiegelCurve
-from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
+from typing import Dict, List
 
-from src.analytics.utils.regression.calibrate import calibrate_ns_ols, calibrate_nss_ols
-from src.analytics.utils.helper import (
-    convert_date_series_to_years, 
-    convert_date_series_to_years_tenor, 
-    get_dict_from_list
-)
+from finx.analytics.utils.financial import implied_forward_rate
+from finx.analytics.utils.lookup import TIMESERIES_TIME_PERIODS, FRACTION_OF_YEAR_TO_PERIOD_STRING, CURVE_OPTIONS
+
+from finx.analytics.utils.regression.ns import NelsonSiegelCurve
+from finx.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
+
+from finx.analytics.utils.regression.calibrate import calibrate_ns_ols, calibrate_nss_ols
+from finx.analytics.utils.helper import convert_date_series_to_years, get_dict_from_list
 
 def construct_ns_curve(
     pricing_date: datetime.datetime,

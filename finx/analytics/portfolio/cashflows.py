@@ -1,10 +1,8 @@
 import datetime
-from typing import Dict, List, Tuple
 import copy
+from typing import Dict, List, Tuple
 
-from src.analytics.utils.date_time import (
-    _default_date
-)
+from finx.analytics.utils.date_time import _default_date
 
 def get_portfolio_future_cashflows(
     portfolio_holdings: Dict,

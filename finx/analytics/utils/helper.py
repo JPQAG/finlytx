@@ -1,7 +1,8 @@
 import datetime
 import math
+
 from dateutil.relativedelta import relativedelta
-from typing import  Any, Dict, List
+from typing import Dict, List
 
 def calculate_years_between_dates(
     start_date: datetime.datetime,

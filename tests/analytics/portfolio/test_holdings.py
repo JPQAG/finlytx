@@ -1,6 +1,6 @@
 import unittest
 
-from src.analytics.portfolio.portfolio_holdings import (
+from finx.analytics.portfolio.holdings import (
     get_holdings_from_trades,
     get_holdings_delta,
     get_unique_securities_from_holdings,
@@ -10,11 +10,11 @@ from src.analytics.portfolio.portfolio_holdings import (
     get_holdings_by_date_and_currency
 )
 
-from src.analytics.utils.date_time import (
+from finx.analytics.utils.date_time import (
     _default_date
 )
 
-from ..helper.testConstants import (
+from tests.analytics.helper.testConstants import (
     MOCK_TRADES_INDEX
 )
 

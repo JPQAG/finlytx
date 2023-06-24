@@ -1,12 +1,10 @@
 from typing import Dict, List
 import datetime
 
-from src.analytics.utils.cashflow import match_cashflow_to_discount_curve
-from src.analytics.utils.cashflow import sum_cashflows
-from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
-
 from .date_time import years_between_dates
-
+from finx.analytics.utils.cashflow import match_cashflow_to_discount_curve
+from finx.analytics.utils.cashflow import sum_cashflows
+from finx.analytics.utils.lookup import TIMESERIES_TIME_PERIODS
 
 def present_value_of_cashflows(
     pricing_date: datetime.date, 

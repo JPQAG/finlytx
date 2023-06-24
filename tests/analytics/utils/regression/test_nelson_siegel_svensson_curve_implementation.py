@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
+from finx.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
 
 
 class TestNelsonSiegelSvenssonCurveImplementation(unittest.TestCase):

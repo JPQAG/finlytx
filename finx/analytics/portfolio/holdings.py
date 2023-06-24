@@ -1,11 +1,10 @@
-from typing import Dict, List
-from operator import itemgetter
 import copy
 import datetime
 
-from src.analytics.utils.date_time import (
-    _default_date
-)
+from typing import Dict, List
+from operator import itemgetter
+
+from finx.analytics.utils.date_time import _default_date
 
 def get_holdings_from_trades(
     trade_history: List[Dict]

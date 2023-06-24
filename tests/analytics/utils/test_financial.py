@@ -1,7 +1,7 @@
 import datetime
 import unittest
 
-from src.analytics.utils.financial import (calculate_daily_returns,
+from finx.analytics.utils.financial import (calculate_daily_returns,
                                            discount_rate,
                                            discount_rate_of_cashflows,
                                            future_value, implied_forward_rate, present_value,

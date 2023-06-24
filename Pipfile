@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 python-dateutil = "*"
 nelson-siegel-svensson = "*"
+pandas = "*"
+scipy = "*"
 
 [dev-packages]
 coverage = "6.4.3"
@@ -14,6 +16,7 @@ mypy = "0.971"
 black = "22.6.0"
 flake8 = "5.0.4"
 colorama = "*"
+pylint = "*"
 
 [requires]
 python_version = "3.10"

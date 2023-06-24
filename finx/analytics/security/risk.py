@@ -1,15 +1,11 @@
-from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
-from typing import Dict, List
 import statistics
 
-from src.analytics.utils.cashflow import get_most_recent_cashflow
-from src.analytics.utils.date_time import (
-    _default_date
-)
+from datetime import datetime, timedelta
+from typing import Dict, List
 
-from src.analytics.utils.date_time import (days_between_dates, months_between_dates, years_between_dates)
-from src.analytics.utils.financial import (present_value)
+from finx.analytics.utils.cashflow import get_most_recent_cashflow
+from finx.analytics.utils.date_time import _default_date, days_between_dates, years_between_dates
+from finx.analytics.utils.financial import present_value
 
 def INCOMPLETE_calculate_macaulay_duration(
     pricing_date: datetime,

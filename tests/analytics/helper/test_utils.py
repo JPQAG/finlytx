@@ -1,4 +1,3 @@
-
 def test_raises(self, result, raisesErrorText):
     with self.assertRaises(Exception) as context:
         result

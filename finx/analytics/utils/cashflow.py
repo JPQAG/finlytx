@@ -1,15 +1,10 @@
 import datetime
 from datetime import time
-from dateutil.relativedelta import relativedelta
 from typing import Dict, List
 
-from src.analytics.utils.date_time import generate_date_range, years_between_dates, get_record_date
-from src.analytics.utils.lookup import (
-    TIMESERIES_TIME_PERIODS,
-    CURVE_OPTIONS,
-    CURVE_OPTIONS_OBJECTS
-)
-from src.analytics.utils.regression.ns import NelsonSiegelCurve
+from finx.analytics.utils.date_time import generate_date_range, years_between_dates, get_record_date
+from finx.analytics.utils.lookup import TIMESERIES_TIME_PERIODS, CURVE_OPTIONS, CURVE_OPTIONS_OBJECTS
+from finx.analytics.utils.regression.ns import NelsonSiegelCurve
 
 def match_cashflow_to_discount_curve(
     cashflows: List[Dict],

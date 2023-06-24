@@ -2,13 +2,13 @@ import math
 import unittest
 import datetime
 
-from src.analytics.security.security_risk import (
+from finx.analytics.security.risk import (
    calculate_macaulay_duration,
    calculate_modified_duration,
    calculate_stdev,
    calculate_security_volatility_stdev
 )
-from src.analytics.utils.cashflow import (
+from finx.analytics.utils.cashflow import (
     generate_cashflows
 )
 

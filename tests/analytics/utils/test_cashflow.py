@@ -2,7 +2,7 @@ import unittest
 import datetime
 from datetime import ( time )
 import numpy as np
-from src.analytics.utils.cashflow import (
+from finx.analytics.utils.cashflow import (
     generate_cashflows, 
     get_most_recent_cashflow,
     match_cashflow_to_discount_curve, 
@@ -11,7 +11,7 @@ from src.analytics.utils.cashflow import (
     generate_cashflows,
     _get_variable_coupon_component
 )
-from src.analytics.utils.lookup import TIMESERIES_TIME_PERIODS, CURVE_OPTIONS
+from finx.analytics.utils.lookup import TIMESERIES_TIME_PERIODS, CURVE_OPTIONS
 
 from ..helper.testConstants import (
     MOCK_CASHFLOW_AND_DISCOUNT_CURVE, 
@@ -22,8 +22,8 @@ from ..helper.testConstants import (
     MOCK_NSS_CURVE_RESULT
 )
 
-from src.analytics.utils.regression.ns import NelsonSiegelCurve
-from src.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
+from finx.analytics.utils.regression.ns import NelsonSiegelCurve
+from finx.analytics.utils.regression.nss import NelsonSiegelSvenssonCurve
 
 class CashflowTestCase(unittest.TestCase):
     def test_match_cashflow_to_discount_curve(self):

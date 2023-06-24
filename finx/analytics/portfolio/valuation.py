@@ -1,13 +1,8 @@
 import datetime
 from typing import Dict
 
-from src.analytics.utils.date_time import (
-    _default_date
-)
-
-from src.analytics.utils.pricing import (
-    get_security_currency_mapping
-)
+from finx.analytics.utils.date_time import _default_date
+from finx.analytics.utils.pricing import get_security_currency_mapping
 
 import datetime
 

@@ -3,15 +3,15 @@ import unittest
 import pandas as pd
 from typing import Any, Dict, List
 
-from src.analytics.utils.cashflow import (
+from finx.analytics.utils.cashflow import (
     generate_cashflows
 )
 
-from src.analytics.utils.date_time import (
+from finx.analytics.utils.date_time import (
     _default_date
 )
 
-from src.analytics.utils.pricing import (
+from finx.analytics.utils.pricing import (
     get_negative_accrued_interest,
     get_accrued_interest,
     get_pricing_history,

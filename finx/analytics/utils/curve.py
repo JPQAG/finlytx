@@ -45,8 +45,8 @@ def construct_ns_curve(
 
 def ns_curve_output(
     NelsonSiegelCurve: NelsonSiegelCurve,
-    tenor_range: list
-) -> list[Dict]:
+    tenor_range: List
+) -> List[Dict]:
     y = NelsonSiegelCurve
     return [{'tenor': tenor, 'rate': y(tenor)} for tenor in tenor_range]
 
@@ -220,19 +220,18 @@ def curve_set(
     
     curve_set = {}
     
-    match curve_type:
-        case "NS":
-            curve_set["constructed_curve"] = construct_ns_curve(pricing_date, market_curve)
-            curve_set["interpolated_market_curve"] = ns_curve_output(
-                curve_set["constructed_curve"], 
-                np.linspace(0, 30, num=30*12).tolist()
-            )
-        case "NSS":
-            curve_set["constructed_curve"] = construct_nss_curve(pricing_date, market_curve)
-            curve_set["interpolated_market_curve"] = nss_curve_output(
-                curve_set["constructed_curve"], 
-                np.linspace(0, 30, num=30*12).tolist()
-            )
+    if curve_type == "NS":
+        curve_set["constructed_curve"] = construct_ns_curve(pricing_date, market_curve)
+        curve_set["interpolated_market_curve"] = ns_curve_output(
+            curve_set["constructed_curve"], 
+            np.linspace(0, 30, num=30*12).tolist()
+        )
+    elif curve_type == "NSS":
+        curve_set["constructed_curve"] = construct_nss_curve(pricing_date, market_curve)
+        curve_set["interpolated_market_curve"] = nss_curve_output(
+            curve_set["constructed_curve"], 
+            np.linspace(0, 30, num=30*12).tolist()
+        )
     
     curve_set["zero_curve"] = bootstrap_curve(curve_set["interpolated_market_curve"])
         

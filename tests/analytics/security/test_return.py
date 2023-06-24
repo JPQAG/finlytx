@@ -1,9 +1,6 @@
 import unittest
 
-from finx.analytics.security.return import (
-    get_period_return,
-    get_return_history
-)
+from finx.analytics.security.performance import get_period_return, get_return_history
 
 class SecurityReturnTestCase(unittest.TestCase):
     
